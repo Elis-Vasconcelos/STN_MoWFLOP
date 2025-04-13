@@ -1,5 +1,5 @@
 ============================== LOG ==============================
-Instance: B
+Instance: 61
 Run: 8
 Metaheuristic: MOEA/D
 Execution started at: Tue Jan 14 04:27:35 PM UTC 2025

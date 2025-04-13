@@ -1,5 +1,5 @@
 ============================== LOG ==============================
-Instance: G
+Instance: 64
 Run: 15
 Metaheuristic: NSGA-II
 Execution started at: Sun Feb  2 12:57:19 AM UTC 2025
