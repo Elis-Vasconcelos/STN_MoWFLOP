@@ -1,7 +1,6 @@
 
 
 # Multi-Objective Offshore Wind Farm Layout Optimization (Mo-WFLOP)  
-**Exact, Heuristic, and Evolutionary Approaches**  
 
 This repository contains the implementation, benchmark instances, and experimental data for the paper:  
 
@@ -13,7 +12,6 @@ The Multi-objective Wind Farm Layout Optimization Problem (MoWFLOP) seeks the op
 
 ## 📂 Repository Structure  
 ```
-.
 ├── /final_dataset/                 # Refined epsilon dataset for each parameter and for all instances
 ├── /Instances/                 
 │   ├── /instance_generator/        # Files for creating additional wind farm sites
