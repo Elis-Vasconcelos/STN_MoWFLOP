@@ -15,7 +15,7 @@ The Multi-objective Wind Farm Layout Optimization Problem (MoWFLOP) seeks the op
 ├── /final_dataset/                 # Refined epsilon dataset for each parameter and for all instances
 ├── /Instances/                 
 │   ├── /instance_generator/        # Files for creating additional wind farm sites
-│   ├── /site/                      # All Wind farm sites used in the project
+│   ├── /site/                      # All Wind farm sites used in the study
 │   ├── /wind/                      # Wind files and their probabilities
 │   └── /wtg/                       # Power generated per turbine type for specific wind velocities
 ├── /raw_results/               
@@ -23,11 +23,18 @@ The Multi-objective Wind Farm Layout Optimization Problem (MoWFLOP) seeks the op
 │   ├── /meta_heuristics/           # Raw execution data of multi-objective algorithms
 │   └── /stat_analysis/             # Raw statistical data for result comparison
 ├── /refined_results/           
-│   ├── /meta_learning/             # Processed data for machine learning
-│   └── /statistical_tables/        # Refined statistical tables for each instance and each statistical measure 
+│   ├── /statistical_tables/        # Refined statistical tables for each instance and each statistical measure 
+│   └── /meta_learning/             # Final results from the meta-learning stage:
+│       ├── features_importance/    # Contains the feature importance of each ML model
+│       ├── figures/                # Visualizations showing feature importance
+│       ├── logs/                   # Logs of each model run
+│       └── /models/                # Trained models (theoretical models + executable formats)
 └── /source_code/
     ├── /meta_features_extraction/  # Code used for features extraction
-    └── /meta_heuristics/           # Code of multi-objective algorithms
+    ├── /meta_heuristics/           # Code of multi-objective algorithms
+    └── /metalearning/              # Code that executes the full meta-learning process, including:
+                                        # - Construction of ML models (theoretical and executable)
+                                        # - Calculation of performance metrics (merit and regression-based)
+                                        # - Dataset construction for model training
+                                        # - Generation of figures
 ```
-
-## 👥 Authors
