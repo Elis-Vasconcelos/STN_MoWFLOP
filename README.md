@@ -38,3 +38,12 @@ The Multi-objective Wind Farm Layout Optimization Problem (MoWFLOP) seeks the op
                                         # - Dataset construction for model training
                                         # - Generation of figures
 ```
+## 👥 Authors  
+| Name | Affiliation | Contact |  
+|------|-------------|---------|  
+| **Gustavo J. N. Silva** | Federal University of Bahia, Institute of Computing | [gustavojorge080@gmail.com](mailto:gustavojorge080@gmail.com) |  
+| **João G. Lofiego** | Federal University of Bahia, Institute of Computing | [joao.lofiego@ufba.br](mailto:joao.lofiego@ufba.br) |
+| **Islame F. C. Fernandes** | Federal University of Bahia, Institute of Computing | [islame.felipe@ufba.br](mailto:islame.felipe@ufba.br) |
+
+## 📧 Contact  
+For questions, contact the lead authors: [gustavojorge080@gmail.com](mailto:gustavojorge080@gmail.com) and [joao.lofiego@ufba.br](mailto:joao.lofiego@ufba.br).  
