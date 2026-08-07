@@ -38,6 +38,75 @@ The Multi-objective Wind Farm Layout Optimization Problem (MoWFLOP) seeks the op
                                         # - Dataset construction for model training
                                         # - Generation of figures
 ```
+## ▶️ Running the metaheuristics (MOEA/D, NSGA-II)
+
+`source_code/meta_heuristics/` contains the C++ MOEA/D and NSGA-II
+implementations used by the paper (population size 100, 10 MOEA/D
+neighbors, both hardcoded in `headers/globals.h` / `moead.cpp`). There is
+no CoMOLS/D implementation in this repository.
+
+### Build
+
+```bash
+cd source_code/meta_heuristics
+make            # builds both ./nsga2 and ./moead
+```
+
+`make nsga2` / `make moead` build just one of the two; `make clean` /
+`make rebuild` act on both. (Originally the `Makefile` only had a single
+`nsga2.cpp`-hardcoded target — it's been extended with a proper `moead`
+target, sharing the same `SRC_FILES`/flags, since both algorithm
+implementations already live in the same source tree.)
+
+### Run
+
+**Run from `source_code/`, not from `meta_heuristics/`.** Instance loading
+is hardcoded to look for `../instances/site/<id>/` relative to the current
+working directory (`get_instance_info` in `instance_info.cpp` ignores the
+`root_folder` CLI arg for this) — `..` only resolves to `instances/`
+correctly when the process is launched from `source_code/`:
+
+```bash
+cd source_code   # NOT source_code/meta_heuristics
+./meta_heuristics/moead <instance_id> [output_dir]
+./meta_heuristics/nsga2 <instance_id> [output_dir]
+```
+
+- `<instance_id>` — a directory name under `instances/site/` (e.g. `1`,
+  `172`, `A`; the repo ships 300 numeric instances, no lettered A–J ones).
+- `[output_dir]` (optional) — where output files are written; defaults to
+  the current directory (`./`). Pass a trailing slash, e.g. `results/1/`.
+  **Two runs sharing an output dir at the same time will corrupt each
+  other's `infoRun.txt`** (both processes truncate-and-append the same
+  path) — give concurrent runs distinct output dirs.
+- Wind angle/speed default to 30°/10 m/s; pass a 5th CLI arg
+  (`<instance> <output_dir> <unused> <angle> <wind>`) to override — see
+  `moead.cpp`/`nsga2.cpp`'s `argc >= 5` branch.
+
+Both algorithms stop after 1,000,000 solution evaluations
+(`stop_criteria` in `moead.cpp`/`nsga2.cpp`). On a modern desktop core, a
+75-mobile-turbine instance (e.g. instance `1`) took **~25 minutes**
+end-to-end in testing; larger instances take longer. There's no way to
+shorten this from the CLI — edit `stop_criteria` in the source and rebuild
+if you want a quicker smoke test. The `Run time:` line printed to stdout is
+just a static header (printed *before* the run starts, not an actual
+timer) — prefix the command with `time` yourself if you want wall-clock
+time.
+
+### Output
+
+All output files land in `[output_dir]` (default cwd):
+
+| File | Written | Contents |
+|---|---|---|
+| `infoRun.txt` | continuously, one line per generation | `Generation <g> \| Revalues: <n> \| GridSize: <archive size>` — progress log |
+| `<instance>_<algo>_<n>.txt` | every 100,000 evaluations (`n` = 100000, 200000, …, 1000000) | current non-dominated archive snapshot, one solution per line: `<cost> <power>` |
+| `<instance>_<algo>_layout.txt` | once, at the final checkpoint (`n` = 1000000) | turbine coordinates of every solution in the final non-dominated archive: one `<x> <y>` line per turbine, solutions separated by a blank line |
+
+`<algo>` is `moead` or `nsga2` depending on which binary you ran. `cost` is
+minimized, `power` is maximized — both printed as positive numbers in the
+snapshot files.
+
 ## 👥 Authors  
 | Name | Affiliation | Contact |  
 |------|-------------|---------|  

@@ -43,19 +43,22 @@ SRC_FILES = \
     $(SRC_DIR)/metaheuristics/nsga2/nsga2.cpp \
     instance_info.cpp
 
-MAIN_FILE = nsga2.cpp
+all: nsga2 moead
 
-OUTPUT = nsga2
+nsga2: $(SRC_FILES) nsga2.cpp
+	@echo Starting compilation of nsga2...
+	@$(CXX) $(CXXFLAGS) -o nsga2 nsga2.cpp $(SRC_FILES)
+	@echo Compilation completed.
 
-$(OUTPUT): $(SRC_FILES) $(MAIN_FILE)
-	@echo Starting compilation of $(OUTPUT)...
-	@$(CXX) $(CXXFLAGS) -o $(OUTPUT) $(MAIN_FILE) $(SRC_FILES)
+moead: $(SRC_FILES) moead.cpp
+	@echo Starting compilation of moead...
+	@$(CXX) $(CXXFLAGS) -o moead moead.cpp $(SRC_FILES)
 	@echo Compilation completed.
 
 clean:
 	@echo Cleaning generated files...
-	@rm -f $(OUTPUT)
+	@rm -f nsga2 moead
 	@echo Clean completed.
 
-rebuild: clean $(OUTPUT)
+rebuild: clean all
 	@echo Rebuild completed.
