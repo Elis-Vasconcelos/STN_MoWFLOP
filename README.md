@@ -120,8 +120,11 @@ generations, the representative solution of each of `STN_LOGGER_NUM_VECTORS`
 weight vectors — the raw data a Search Trajectory Network is built from
 later. Both constants live in `headers/globals.h`, next to
 `SIZE_OF_POPULATION`. Columns: `run_id,vector_id,generation,f_cost,f_power,
-occupied`, where `occupied` is the space-separated list of global candidate
-indices holding a turbine (sorted ascending), decodable through
+weight1,weight2,occupied`, where `weight1`/`weight2` are that row's vector's
+literal weights (redundant with `vector_id`, since `build_weight_vector` is
+deterministic, but avoids a join step before feeding this into `create.R`)
+and `occupied` is the space-separated list of global candidate indices
+holding a turbine (sorted ascending), decodable through
 `<instance>_<algo>_candidates.csv`. `f_cost` is positive and minimized;
 `f_power` is positive and maximized.
 
@@ -150,13 +153,54 @@ missed. If exact terminal nodes matter for a metric (e.g. `n_end` in the
 STN reference model), account for this in post-processing or force one
 extra log call after the loop.
 
-After a short local run, check the output with:
-
-After a short local run, check the output with:
+After a short local run (pass a small `stop_criteria`, e.g. `20000`, as the
+6th CLI arg — see "Run" above), check the output. There's no automated
+validator script committed yet (`validate_stn_log.py` was referenced by an
+older draft of this doc but never actually added to the repo) — use these
+manual checks instead, run from `source_code/`:
 
 ```bash
-python meta_heuristics/validate_stn_log.py <output_dir> <instance_id> <algo>
+file="<output_dir>/<instance>_<algo>_stn.csv"
+
+# every row should have tau_total turbines occupied (column 8; columns
+# shifted right by weight1/weight2)
+awk -F',' 'NR>1{n=split($8,a," "); if(n!=EXPECTED_TAU) print "line " NR ": " n " turbines"}' "$file"
+
+# sampled generations should be 0, STN_LOGGER_INTERVAL, 2*STN_LOGGER_INTERVAL, ...
+awk -F',' 'NR>1{print $3}' "$file" | sort -n -u
+
+# no vector_id should have a repeated or out-of-order generation
+# (BEGIN{prev_v=-1} avoids a false positive on vector_id 0: an
+# uninitialized awk variable compares equal to "0" by default, which
+# collides with vector 0 specifically)
+awk -F',' 'NR>1{print $2","$3}' "$file" | sort -t, -k1,1n -k2,2n | \
+  awk -F',' 'BEGIN{prev_v=-1} prev_v==$1 && $2<=prev_g {print "order broken in vector " $1} {prev_v=$1; prev_g=$2}'
 ```
+No output beyond headers on any of the three means the log is consistent.
+
+### Running a full campaign
+
+`meta_heuristics/scripts/run_one.sh` and `run_campaign.sh` automate running
+many instances/runs/algorithms and organize the output under
+`raw_results/meta_heuristics_stn/<algo>/<instance>/<run_id>/`:
+
+```bash
+cd source_code
+seq 1 300 > instances.txt
+./meta_heuristics/scripts/run_campaign.sh instances.txt 20   # 20 runs, full stop_criteria (1e6)
+```
+
+- Idempotent: re-running skips any `(instance, algo, run_id)` whose
+  `_stn.csv` already exists — safe to interrupt and resume.
+- `_candidates.csv` is instance-only, so `run_one.sh` keeps a single
+  canonical copy per instance under `raw_results/meta_heuristics_stn/
+  candidates/` and symlinks (relative, portable across machines) it into
+  every run's directory, instead of letting the ~290KB table get
+  regenerated in every one of the `instances × runs × 2` output
+  directories a full campaign creates.
+- Sequential on purpose. To parallelize on the supercomputer's actual job
+  scheduler, call `run_one.sh <instance> <algo> <run_id> [stop_criteria]`
+  directly, one combination per job/task, instead of `run_campaign.sh`.
 
 ## 👥 Authors  
 | Name | Affiliation | Contact |  

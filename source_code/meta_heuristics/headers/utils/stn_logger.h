@@ -33,8 +33,12 @@ class STNLogger {
     public:
         // Escreve <file_prefix>_stn.csv (a trajetória) e, de uma vez,
         // <file_prefix>_candidates.csv (a tabela índice global -> x, y que
-        // decodifica a coluna occupied).
-        STNLogger(const std::string& file_prefix);
+        // decodifica a coluna occupied). lambda_vector é o mesmo conjunto de
+        // p vetores da STN passado a select_representatives -- guardado aqui
+        // só para gravar Weight1/Weight2 literais em cada linha (formato que
+        // create.R do STNs-MOCO espera), já que a geração é determinística e
+        // vector_id sozinho já seria reconstituível, mas não sem recalcular.
+        STNLogger(const std::string& file_prefix, const std::vector<std::pair<double, double>>& lambda_vector);
         ~STNLogger();
 
         void log(int generation, const std::vector<Solution*>& representatives);
@@ -47,6 +51,7 @@ class STNLogger {
         std::ofstream out;
         // índice global de uma posição = zone_offset[zona] + índice na zona
         std::vector<int> zone_offset;
+        std::vector<std::pair<double, double>> lambda_vector;
 };
 
 // Escolhe, para cada vetor de peso, o membro da população que minimiza a

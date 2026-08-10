@@ -1,8 +1,9 @@
 #include <iostream>
-#include <ctime> 
+#include <ctime>
 #include <cstdlib>
-#include <utility> 
+#include <utility>
 #include <random>
+#include <algorithm>
 #include "../../../headers/global_modules/generate_initial_population/population.h"
 #include "../../../headers/global_modules/generate_initial_population/generate_rSolution.h"
 #include "../../../headers/global_modules/genetic_operators/mutation.h"
@@ -54,7 +55,16 @@ vector<Solution*> nsga2(vector<Solution>& pop){
   // próprios da STN só para observar a busca: vector_id fica comparável com
   // o MOEA/D, que usa esses mesmos p vetores da STN pelo mesmo motivo
   vector<pair<double, double>> stn_lambda_vector = build_weight_vector(STN_LOGGER_NUM_VECTORS);
-  STNLogger stn(root_folder + instance + "_" + algorithm);
+  STNLogger stn(root_folder + instance + "_" + algorithm, stn_lambda_vector);
+
+  // z_point mantido do mesmo jeito que o moead.cpp faz: iniciado
+  // uma vez e só atualizado por max() contra o arquivo pareto compartilhado,
+  // nunca recalculado do zero a cada geração senão o "ponto ideal" do
+  // NSGA-II pode piorar de uma geração pra outra (a seleção por crowding
+  // distance pode descartar um extremo já encontrado), o que o do MOEA/D
+  // nunca faz por construção. Com z* inconsistente entre os dois, a mesma
+  // escalarização de Chebyshev deixa de ser comparável entre eles.
+  pair<double, double> z_point = get_best_z_point(*population);
 
   int generation = 0;
 
@@ -62,9 +72,13 @@ vector<Solution*> nsga2(vector<Solution>& pop){
 
     infoRunNSGA2 << "Generation " << generation << " | Revalues: " << countRevalue << " | GridSize: " << pareto->getSize() << endl;
 
+    for(const auto sol : pareto->getElements()){
+      z_point.first = max(z_point.first, sol->fitness.first);
+      z_point.second = max(z_point.second, sol->fitness.second);
+    }
+
     // observador externo: para cada vetor, a representativa é o membro da
     // população que minimiza a escalarização de Chebyshev daquele vetor
-    pair<double, double> z_point = get_best_z_point(*population);
     stn.log(generation, select_representatives(*population, stn_lambda_vector, z_point));
 
     vector<Solution*> * offspring_population = new vector<Solution*>();

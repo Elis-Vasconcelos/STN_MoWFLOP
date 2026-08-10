@@ -58,7 +58,7 @@ void moead(vector<Solution>& population){
 
   ofstream infoRun(root_folder + "infoRun.txt");
 
-  STNLogger stn(root_folder + instance + "_" + algorithm);
+  STNLogger stn(root_folder + instance + "_" + algorithm, stn_lambda_vector);
 
   while (countRevalue < stop_criteria) {
 

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-STNLogger::STNLogger(const string& file_prefix){
+STNLogger::STNLogger(const string& file_prefix, const vector<pair<double, double>>& lambda_vector) : lambda_vector(lambda_vector){
 
   // calcula offset de cada zona para guardar índice global de posições ocupadas
   zone_offset.resize(num_zones);
@@ -38,7 +38,7 @@ STNLogger::STNLogger(const string& file_prefix){
 
   // "\n" em vez de endl: este é o arquivo de maior volume da execução e não
   // vale dar flush a cada linha; o destrutor fecha o stream
-  out << "run_id,vector_id,generation,f_cost,f_power,occupied" << "\n";
+  out << "run_id,vector_id,generation,f_cost,f_power,weight1,weight2,occupied" << "\n";
   out << fixed << setprecision(6);
 }
 
@@ -67,7 +67,8 @@ void STNLogger::write_row(int generation, int vector_id, const Solution& solutio
   // fitness.first é o custo negado (os dois objetivos são maximizados
   // internamente); o CSV grava custo positivo, a ser minimizado
   out << stn_run_id << "," << vector_id << "," << generation << ","
-      << -solution.fitness.first << "," << solution.fitness.second << ",";
+      << -solution.fitness.first << "," << solution.fitness.second << ","
+      << lambda_vector[vector_id].first << "," << lambda_vector[vector_id].second << ",";
 
   
   // localização (índices globais) das turbinas alocadas dessa solução
