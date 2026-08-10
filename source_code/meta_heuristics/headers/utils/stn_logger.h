@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "../global_modules/generate_initial_population/generate_rSolution.h"
@@ -11,15 +12,16 @@
 // Definido nos main (moead.cpp / nsga2.cpp), lido de argv[5].
 extern int stn_run_id;
 
-// Registra, a cada geração, a solução representativa de cada vetor de peso
-// da decomposição -- os dados crus a partir dos quais uma Search Trajectory
-// Network é montada depois.
+// Registra, a cada STN_LOGGER_INTERVAL gerações, a solução representativa
+// de cada vetor de peso da STN -- os dados crus a partir dos quais uma
+// Search Trajectory Network é montada depois.
 //
 // O logger não conhece o algoritmo: recebe as soluções representativas já
-// escolhidas, uma por vetor, na mesma ordem dos vetores de peso. No MOEA/D
-// isso é a própria população (population[j] é a melhor solução do
-// subproblema j, alinhada com lambda_vector[j]). Em algoritmos sem vetores
-// de peso, como o NSGA-II, o chamador seleciona as representativas antes.
+// escolhidas, uma por vetor, na mesma ordem dos vetores de peso -- sempre
+// via select_representatives (abaixo), já que os p vetores da STN são um
+// conjunto próprio, menor e mais esparso que os SIZE_OF_POPULATION vetores
+// internos do MOEA/D, então mesmo lá a representativa de cada vetor da STN
+// precisa ser escolhida, não sai direto da população.
 //
 // Cada linha é um (run, vetor, geração): os dois objetivos mais os índices
 // globais das posições ocupadas (geometria crua, um índice por turbina
@@ -35,7 +37,6 @@ class STNLogger {
         STNLogger(const std::string& file_prefix);
         ~STNLogger();
 
-        void log(int generation, const std::vector<Solution>& representatives);
         void log(int generation, const std::vector<Solution*>& representatives);
 
     private:
@@ -46,8 +47,23 @@ class STNLogger {
         std::ofstream out;
         // índice global de uma posição = zone_offset[zona] + índice na zona
         std::vector<int> zone_offset;
-        // última ocupação escrita por vetor, para omitir linhas repetidas
-        std::vector<std::vector<int>> last_occupied;
 };
+
+// Escolhe, para cada vetor de peso, o membro da população que minimiza a
+// escalarização de Chebyshev daquele vetor -- a solução representativa que
+// o log da STN registra. Um observador externo em ambos os algoritmos: nem
+// MOEA/D nem NSGA-II decompõem o problema nos p vetores próprios da STN
+// (o MOEA/D decompõe nos seus SIZE_OF_POPULATION vetores internos, um
+// conjunto diferente), então a seleção roda por cima da população corrente
+// dos dois do mesmo jeito.
+std::vector<Solution*> select_representatives(
+    std::vector<Solution>& population,
+    std::vector<std::pair<double, double>>& lambda_vector,
+    std::pair<double, double>& z_point);
+
+std::vector<Solution*> select_representatives(
+    std::vector<Solution*>& population,
+    std::vector<std::pair<double, double>>& lambda_vector,
+    std::pair<double, double>& z_point);
 
 #endif
