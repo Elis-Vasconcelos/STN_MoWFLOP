@@ -41,6 +41,7 @@ SRC_FILES = \
     $(SRC_DIR)/metaheuristics/nsga2/modules/arena_non_dominated_sorting.cpp \
     ${SRC_DIR}/metaheuristics/nsga2/modules/crowding_distance.cpp \
     $(SRC_DIR)/metaheuristics/nsga2/nsga2.cpp \
+    $(SRC_DIR)/utils/stn_logger.cpp \
     instance_info.cpp
 
 all: nsga2 moead

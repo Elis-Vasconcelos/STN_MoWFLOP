@@ -18,6 +18,10 @@
 #include "../../../headers/metaheuristics/nsga2/nsga2.h"
 #include "../../../headers/globals.h"
 
+#include "../../../headers/metaheuristics/moead/modules/generate_weight_vectors.h"
+#include "../../../headers/metaheuristics/moead/modules/get_best_z_point.h"
+#include "../../../headers/utils/stn_logger.h"
+
 void add(vector<Solution*>& population, Solution* solution){
   for (auto& existing_solution : population) {
     if (isEqual(*existing_solution, *solution)) {
@@ -43,15 +47,25 @@ vector<Solution*> nsga2(vector<Solution>& pop){
   int size_population = population->size(); 
   double cross_prob = 0.6;
   double mutation_prob = 0.5;
-  int stop_criteria = 1000000;
 
   ofstream infoRunNSGA2(root_folder + "infoRun.txt");
+
+  // NSGA-II não tem decomposição interna, então usamos os p vetores de peso
+  // próprios da STN só para observar a busca: vector_id fica comparável com
+  // o MOEA/D, que usa esses mesmos p vetores da STN pelo mesmo motivo
+  vector<pair<double, double>> stn_lambda_vector = build_weight_vector(STN_LOGGER_NUM_VECTORS);
+  STNLogger stn(root_folder + instance + "_" + algorithm);
 
   int generation = 0;
 
   while(countRevalue < stop_criteria){
 
     infoRunNSGA2 << "Generation " << generation << " | Revalues: " << countRevalue << " | GridSize: " << pareto->getSize() << endl;
+
+    // observador externo: para cada vetor, a representativa é o membro da
+    // população que minimiza a escalarização de Chebyshev daquele vetor
+    pair<double, double> z_point = get_best_z_point(*population);
+    stn.log(generation, select_representatives(*population, stn_lambda_vector, z_point));
 
     vector<Solution*> * offspring_population = new vector<Solution*>();
 

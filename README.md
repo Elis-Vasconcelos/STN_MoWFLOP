@@ -68,30 +68,34 @@ correctly when the process is launched from `source_code/`:
 
 ```bash
 cd source_code   # NOT source_code/meta_heuristics
-./meta_heuristics/moead <instance_id> [output_dir]
-./meta_heuristics/nsga2 <instance_id> [output_dir]
+./meta_heuristics/moead <instance_id> [output_dir] [angle] [wind] [run_id] [stop_criteria]
+./meta_heuristics/nsga2 <instance_id> [output_dir] [angle] [wind] [run_id] [stop_criteria]
 ```
+
+Arguments are strictly positional — to reach `run_id` you must also pass
+`angle` and `wind` (their defaults are `30` and `10`).
 
 - `<instance_id>` — a directory name under `instances/site/` (e.g. `1`,
   `172`, `A`; the repo ships 300 numeric instances, no lettered A–J ones).
-- `[output_dir]` (optional) — where output files are written; defaults to
-  the current directory (`./`). Pass a trailing slash, e.g. `results/1/`.
-  **Two runs sharing an output dir at the same time will corrupt each
-  other's `infoRun.txt`** (both processes truncate-and-append the same
-  path) — give concurrent runs distinct output dirs.
-- Wind angle/speed default to 30°/10 m/s; pass a 5th CLI arg
-  (`<instance> <output_dir> <unused> <angle> <wind>`) to override — see
-  `moead.cpp`/`nsga2.cpp`'s `argc >= 5` branch.
+- `[output_dir]` — where output files are written; defaults to the current
+  directory (`./`). Pass a trailing slash, e.g. `results/1/`. **Two runs
+  sharing an output dir at the same time will corrupt each other's
+  `infoRun.txt`** (both processes truncate-and-append the same path) —
+  give concurrent runs distinct output dirs.
+- `[angle]` / `[wind]` — wind angle in degrees and speed in m/s; default
+  30° / 10 m/s.
+- `[run_id]` — integer stamped on every row of the STN trajectory CSV, so
+  independent repetitions stay distinguishable once their CSVs are
+  concatenated. Defaults to `0`.
+- `[stop_criteria]` — number of solution evaluations to stop after;
+  defaults to 1,000,000. Lower it for a quick smoke test.
 
-Both algorithms stop after 1,000,000 solution evaluations
-(`stop_criteria` in `moead.cpp`/`nsga2.cpp`). On a modern desktop core, a
+On a modern desktop core, a full 1,000,000-evaluation run of a
 75-mobile-turbine instance (e.g. instance `1`) took **~25 minutes**
-end-to-end in testing; larger instances take longer. There's no way to
-shorten this from the CLI — edit `stop_criteria` in the source and rebuild
-if you want a quicker smoke test. The `Run time:` line printed to stdout is
-just a static header (printed *before* the run starts, not an actual
-timer) — prefix the command with `time` yourself if you want wall-clock
-time.
+end-to-end in testing; larger instances take longer. The `Run time:` line
+printed to stdout is just a static header (printed *before* the run
+starts, not an actual timer) — prefix the command with `time` yourself if
+you want wall-clock time.
 
 ### Output
 
@@ -102,10 +106,57 @@ All output files land in `[output_dir]` (default cwd):
 | `infoRun.txt` | continuously, one line per generation | `Generation <g> \| Revalues: <n> \| GridSize: <archive size>` — progress log |
 | `<instance>_<algo>_<n>.txt` | every 100,000 evaluations (`n` = 100000, 200000, …, 1000000) | current non-dominated archive snapshot, one solution per line: `<cost> <power>` |
 | `<instance>_<algo>_layout.txt` | once, at the final checkpoint (`n` = 1000000) | turbine coordinates of every solution in the final non-dominated archive: one `<x> <y>` line per turbine, solutions separated by a blank line |
+| `<instance>_<algo>_stn.csv` | continuously, per generation | Search Trajectory Network raw data — see below |
+| `<instance>_<algo>_candidates.csv` | once, at start | `global_index,zone,zone_index,x,y` — decodes the `occupied` column of the STN CSV into coordinates |
 
 `<algo>` is `moead` or `nsga2` depending on which binary you ran. `cost` is
 minimized, `power` is maximized — both printed as positive numbers in the
 snapshot files.
+
+### Search Trajectory Network logging
+
+`<instance>_<algo>_stn.csv` records, every `STN_LOGGER_INTERVAL`
+generations, the representative solution of each of `STN_LOGGER_NUM_VECTORS`
+weight vectors — the raw data a Search Trajectory Network is built from
+later. Both constants live in `headers/globals.h`, next to
+`SIZE_OF_POPULATION`. Columns: `run_id,vector_id,generation,f_cost,f_power,
+occupied`, where `occupied` is the space-separated list of global candidate
+indices holding a turbine (sorted ascending), decodable through
+`<instance>_<algo>_candidates.csv`. `f_cost` is positive and minimized;
+`f_power` is positive and maximized.
+
+The occupation-grid signature that partitions the search space into STN
+nodes is deliberately *not* computed here — its cell size is a
+post-processing choice, and logging raw occupied positions lets any cell
+size be recomputed later without rerunning the algorithm.
+
+The STN's `STN_LOGGER_NUM_VECTORS` weight vectors are generated the same
+way as MOEA/D's own decomposition (`build_weight_vector`, uniform between
+`(1,0)` and `(0,1)`), but are a separate, smaller set — MOEA/D's own
+`SIZE_OF_POPULATION` internal vectors are unaffected and still drive its
+mating/replacement. Because of that, `population[j]` in MOEA/D is *not*
+aligned with the STN's vector `j`: every generation logged, both
+algorithms call `select_representatives` (`stn_logger.h`) to pick, for
+each STN vector, the population member minimising `calculate_gte` against
+it and the current `z_point`. This makes both algorithms observed the
+same way, at the STN's coarser resolution — an external instrumentation
+layer imposed by the experimenter, not part of either algorithm, and
+should be declared as such in any methodology write-up.
+
+Sampling every `STN_LOGGER_INTERVAL`-th generation means the very last
+generation of a run is only captured in the log if it happens to be a
+multiple of the interval — the trajectory's true terminal state can be
+missed. If exact terminal nodes matter for a metric (e.g. `n_end` in the
+STN reference model), account for this in post-processing or force one
+extra log call after the loop.
+
+After a short local run, check the output with:
+
+After a short local run, check the output with:
+
+```bash
+python meta_heuristics/validate_stn_log.py <output_dir> <instance_id> <algo>
+```
 
 ## 👥 Authors  
 | Name | Affiliation | Contact |  
