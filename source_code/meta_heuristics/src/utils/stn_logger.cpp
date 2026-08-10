@@ -122,12 +122,16 @@ void STNLogger::write_candidate_table(const string& file_path){
   file.close();
 }
 
+// overload para MOEA/D, cuja população é vector<Solution>
 vector<Solution*> select_representatives(vector<Solution>& population, vector<pair<double, double>>& lambda_vector, pair<double, double>& z_point){
 
   vector<Solution*> representatives(lambda_vector.size());
 
+  // um representante por vetor de peso (lambda) da STN
   for(int j = 0; j < (int) lambda_vector.size(); j++){
 
+    // busca linear pelo indivíduo com menor tchebycheff (calculate_gte)
+    // para esse lambda -- esse é o "melhor" sob aquele vetor de peso
     Solution* best = &population[0];
     double best_gte = calculate_gte(best->fitness, lambda_vector[j], z_point);
 
@@ -145,6 +149,7 @@ vector<Solution*> select_representatives(vector<Solution>& population, vector<pa
   return representatives;
 }
 
+// overload idêntico ao de cima, mas para NSGA-II, cuja população é vector<Solution*> em vez de vector<Solution>.
 vector<Solution*> select_representatives(vector<Solution*>& population, vector<pair<double, double>>& lambda_vector, pair<double, double>& z_point){
 
   vector<Solution*> representatives(lambda_vector.size());
