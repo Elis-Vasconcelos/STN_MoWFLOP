@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include "../../headers/globals.h"
+#include "../../headers/metaheuristics/moead/modules/tchebycheff.h"
 #include "../../headers/utils/stn_logger.h"
 
 using namespace std;
@@ -44,16 +46,13 @@ STNLogger::~STNLogger(){
   out.close();
 }
 
-void STNLogger::log(int generation, const vector<Solution>& representatives){
-  last_occupied.resize(representatives.size());
-
-  for(int j = 0; j < (int) representatives.size(); j++){
-    write_row(generation, j, representatives[j]);
-  }
-}
-
 void STNLogger::log(int generation, const vector<Solution*>& representatives){
-  last_occupied.resize(representatives.size());
+
+  // amostragem por intervalo: só registra 1 em cada STN_LOGGER_INTERVAL
+  // gerações -- generation 0 (população inicial) sempre cai aqui
+  if(generation % STN_LOGGER_INTERVAL != 0){
+    return;
+  }
 
   // escreve uma linha csv pra cada solução representante
   for(int j = 0; j < (int) representatives.size(); j++){
@@ -64,14 +63,6 @@ void STNLogger::log(int generation, const vector<Solution*>& representatives){
 void STNLogger::write_row(int generation, int vector_id, const Solution& solution){
 
   vector<int> occupied = occupied_global_indices(solution);
-
-  // uma solução representante inalterada ocupa a mesma localização da linha
-  // anterior daquele vetor: não acrescenta nada à trajetória e é omitida
-  if(occupied == last_occupied[vector_id]){
-    return;
-  }
-
-  last_occupied[vector_id] = occupied;
 
   // fitness.first é o custo negado (os dois objetivos são maximizados
   // internamente); o CSV grava custo positivo, a ser minimizado
@@ -129,4 +120,50 @@ void STNLogger::write_candidate_table(const string& file_path){
   }
 
   file.close();
+}
+
+vector<Solution*> select_representatives(vector<Solution>& population, vector<pair<double, double>>& lambda_vector, pair<double, double>& z_point){
+
+  vector<Solution*> representatives(lambda_vector.size());
+
+  for(int j = 0; j < (int) lambda_vector.size(); j++){
+
+    Solution* best = &population[0];
+    double best_gte = calculate_gte(best->fitness, lambda_vector[j], z_point);
+
+    for(int i = 1; i < (int) population.size(); i++){
+      double gte = calculate_gte(population[i].fitness, lambda_vector[j], z_point);
+      if(gte < best_gte){
+        best_gte = gte;
+        best = &population[i];
+      }
+    }
+
+    representatives[j] = best;
+  }
+
+  return representatives;
+}
+
+vector<Solution*> select_representatives(vector<Solution*>& population, vector<pair<double, double>>& lambda_vector, pair<double, double>& z_point){
+
+  vector<Solution*> representatives(lambda_vector.size());
+
+  for(int j = 0; j < (int) lambda_vector.size(); j++){
+
+    Solution* best = population[0];
+    double best_gte = calculate_gte(best->fitness, lambda_vector[j], z_point);
+
+    for(int i = 1; i < (int) population.size(); i++){
+      double gte = calculate_gte(population[i]->fitness, lambda_vector[j], z_point);
+      if(gte < best_gte){
+        best_gte = gte;
+        best = population[i];
+      }
+    }
+
+    representatives[j] = best;
+  }
+
+  return representatives;
 }
