@@ -127,14 +127,18 @@ later. Both are **runtime CLI args** (`stn_p`/`stn_interval`, see "Run"
 above), defaulting to `10`/`50` when omitted — `headers/globals.h` only
 declares them (`extern`); the actual values are set per-run in
 `moead.cpp`/`nsga2.cpp`'s `main()`, alongside `SIZE_OF_POPULATION` (which
-*is* still a compile-time constant). Columns: `run_id,vector_id,generation,f_cost,f_power,
-weight1,weight2,occupied`, where `weight1`/`weight2` are that row's vector's
-literal weights (redundant with `vector_id`, since `build_weight_vector` is
-deterministic, but avoids a join step before feeding this into `create.R`)
-and `occupied` is the space-separated list of global candidate indices
-holding a turbine (sorted ascending), decodable through
-`<instance>_<algo>_candidates.csv`. `f_cost` is positive and minimized;
-`f_power` is positive and maximized.
+*is* still a compile-time constant). Columns:
+`algorithm,instance,run_id,vector_id,generation,iteration,f_cost,f_power,
+weight1,weight2,occupied`. `algorithm`/`instance` are literal columns (not
+just encoded in the filename) and `iteration` is a sequential recording
+index (0,1,2,...) separate from `generation` (the raw generation number)
+— both per `STN_MoWFLOP.pdf` §10.2's minimum log fields. `weight1`/`weight2`
+are that row's vector's literal weights (redundant with `vector_id`, since
+`build_weight_vector` is deterministic, but avoids a join step before
+feeding this into `create.R`) and `occupied` is the space-separated list
+of global candidate indices holding a turbine (sorted ascending), decodable
+through `<instance>_<algo>_candidates.csv`. `f_cost` is positive and
+minimized; `f_power` is positive and maximized.
 
 The occupation-grid signature that partitions the search space into STN
 nodes is deliberately *not* computed here — its cell size is a
@@ -170,18 +174,22 @@ manual checks instead, run from `source_code/`:
 ```bash
 file="<output_dir>/<instance>_<algo>_stn.csv"
 
-# every row should have tau_total turbines occupied (column 8; columns
-# shifted right by weight1/weight2)
-awk -F',' 'NR>1{n=split($8,a," "); if(n!=EXPECTED_TAU) print "line " NR ": " n " turbines"}' "$file"
+# every row should have tau_total turbines occupied (column 11: algorithm,
+# instance, run_id, vector_id, generation, iteration, f_cost, f_power,
+# weight1, weight2, occupied)
+awk -F',' 'NR>1{n=split($11,a," "); if(n!=EXPECTED_TAU) print "line " NR ": " n " turbines"}' "$file"
 
 # sampled generations should be 0, STN_LOGGER_INTERVAL, 2*STN_LOGGER_INTERVAL, ...
-awk -F',' 'NR>1{print $3}' "$file" | sort -n -u
+awk -F',' 'NR>1{print $5}' "$file" | sort -n -u
+
+# iteration should be 0, 1, 2, ... (sequential, unlike generation above)
+awk -F',' 'NR>1{print $6}' "$file" | sort -n -u
 
 # no vector_id should have a repeated or out-of-order generation
 # (BEGIN{prev_v=-1} avoids a false positive on vector_id 0: an
 # uninitialized awk variable compares equal to "0" by default, which
 # collides with vector 0 specifically)
-awk -F',' 'NR>1{print $2","$3}' "$file" | sort -t, -k1,1n -k2,2n | \
+awk -F',' 'NR>1{print $4","$5}' "$file" | sort -t, -k1,1n -k2,2n | \
   awk -F',' 'BEGIN{prev_v=-1} prev_v==$1 && $2<=prev_g {print "order broken in vector " $1} {prev_v=$1; prev_g=$2}'
 ```
 No output beyond headers on any of the three means the log is consistent.
@@ -287,8 +295,8 @@ running a full-dataset instances file.
 
 ```bash
 cd source_code
-./meta_heuristics/scripts/batch.sh                      # defaults: instances_stn10.txt, moead+nsga2, 20 runs
-./meta_heuristics/scripts/batch.sh my_instances.txt "moead nsga2" 20 1000000 30 10 100 10
+./meta_heuristics/scripts/batch.sh                      # defaults: instances_stn10.txt, moead+nsga2, 10 runs
+./meta_heuristics/scripts/batch.sh my_instances.txt "moead nsga2" 10 1000000 30 10 100 50
 ```
 
 To sweep P (e.g. 10/50/100) with the interval held fixed, call `batch.sh`
@@ -299,9 +307,9 @@ returns immediately, calling it 3 times back to back like this actually
 runs the 3 P's **concurrently**, not sequentially:
 
 ```bash
-./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 20 1000000 30 10 10  1
-./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 20 1000000 30 10 50  1
-./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 20 1000000 30 10 100 1
+./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 10 1000000 30 10 10  50
+./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 10 1000000 30 10 50  50
+./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 10 1000000 30 10 100 50
 ```
 
 This needs enough free cores to run all of it at once (10 instances × 2

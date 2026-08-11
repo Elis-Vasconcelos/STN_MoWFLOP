@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "../../headers/globals.h"
+#include "../../headers/global_modules/generate_initial_population/population.h"
 #include "../../headers/metaheuristics/moead/modules/tchebycheff.h"
 #include "../../headers/utils/stn_logger.h"
 
@@ -38,7 +39,14 @@ STNLogger::STNLogger(const string& file_prefix, const vector<pair<double, double
 
   // "\n" em vez de endl: este é o arquivo de maior volume da execução e não
   // vale dar flush a cada linha; o destrutor fecha o stream
-  out << "run_id,vector_id,generation,f_cost,f_power,weight1,weight2,occupied" << "\n";
+  //
+  // algorithm/instance/iteration adicionados pra bater com os campos
+  // mínimos da Seção 10.2 do STN_MoWFLOP.pdf (antes só existiam via nome
+  // de arquivo, não como coluna literal). generation continua além do
+  // mínimo exigido -- registra a geração bruta, útil pra depuração e pro
+  // cálculo de nGen por run no lado R -- "iteration" é o índice sequencial
+  // de gravação que o documento pede especificamente (não a geração bruta).
+  out << "algorithm,instance,run_id,vector_id,generation,iteration,f_cost,f_power,weight1,weight2,occupied" << "\n";
   out << fixed << setprecision(6);
 }
 
@@ -58,6 +66,10 @@ void STNLogger::log(int generation, const vector<Solution*>& representatives){
   for(int j = 0; j < (int) representatives.size(); j++){
     write_row(generation, j, *representatives[j]);
   }
+
+  // incrementa só depois de gravar essa geração inteira (todos os
+  // vetores) -- record_index conta gravações, não linhas
+  record_index++;
 }
 
 void STNLogger::write_row(int generation, int vector_id, const Solution& solution){
@@ -66,7 +78,7 @@ void STNLogger::write_row(int generation, int vector_id, const Solution& solutio
 
   // fitness.first é o custo negado (os dois objetivos são maximizados
   // internamente); o CSV grava custo positivo, a ser minimizado
-  out << stn_run_id << "," << vector_id << "," << generation << ","
+  out << algorithm << "," << instance << "," << stn_run_id << "," << vector_id << "," << generation << "," << record_index << ","
       << -solution.fitness.first << "," << solution.fitness.second << ","
       << lambda_vector[vector_id].first << "," << lambda_vector[vector_id].second << ",";
 

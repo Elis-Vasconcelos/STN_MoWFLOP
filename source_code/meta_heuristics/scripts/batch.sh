@@ -24,7 +24,7 @@ cd "$script_dir/../.."   # scripts/ -> meta_heuristics/ -> source_code/
 
 instances_file="${1:-instances_stn10.txt}"
 algos="${2:-moead nsga2}"
-num_runs="${3:-20}"
+num_runs="${3:-10}"
 stop_criteria="${4:-1000000}"
 angle="${5:-30}"
 wind="${6:-10}"

@@ -52,6 +52,10 @@ class STNLogger {
         // índice global de uma posição = zone_offset[zona] + índice na zona
         std::vector<int> zone_offset;
         std::vector<std::pair<double, double>> lambda_vector;
+        // índice sequencial de gravação (0,1,2,...), incrementado a cada
+        // linha efetivamente escrita -- não a geração bruta. Campo
+        // "iteration" exigido pela Seção 10.2 do STN_MoWFLOP.pdf.
+        int record_index = 0;
 };
 
 // Escolhe, para cada vetor de peso, o membro da população que minimiza a
