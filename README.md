@@ -118,218 +118,196 @@ All output files land in `[output_dir]` (default cwd):
 minimized, `power` is maximized — both printed as positive numbers in the
 snapshot files.
 
-### Search Trajectory Network logging
+### Search Trajectory Network (STN) logging
 
 `<instance>_<algo>_stn.csv` records, every `STN_LOGGER_INTERVAL`
 generations, the representative solution of each of `STN_LOGGER_NUM_VECTORS`
-weight vectors — the raw data a Search Trajectory Network is built from
-later. Both are **runtime CLI args** (`stn_p`/`stn_interval`, see "Run"
-above), defaulting to `10`/`50` when omitted — `headers/globals.h` only
-declares them (`extern`); the actual values are set per-run in
-`moead.cpp`/`nsga2.cpp`'s `main()`, alongside `SIZE_OF_POPULATION` (which
-*is* still a compile-time constant). Columns:
-`algorithm,instance,run_id,vector_id,generation,iteration,f_cost,f_power,
-weight1,weight2,occupied`. `algorithm`/`instance` are literal columns (not
-just encoded in the filename) and `iteration` is a sequential recording
-index (0,1,2,...) separate from `generation` (the raw generation number)
-— both per `STN_MoWFLOP.pdf` §10.2's minimum log fields. `weight1`/`weight2`
-are that row's vector's literal weights (redundant with `vector_id`, since
-`build_weight_vector` is deterministic, but avoids a join step before
-feeding this into `create.R`) and `occupied` is the space-separated list
-of global candidate indices holding a turbine (sorted ascending), decodable
-through `<instance>_<algo>_candidates.csv`. `f_cost` is positive and
-minimized; `f_power` is positive and maximized.
+weight vectors — the raw data an STN is built from later. Both are
+**runtime CLI args** (`stn_p`/`stn_interval`, see "Run" above; defaults
+`10`/`50`) — `headers/globals.h` only declares them (`extern`), the actual
+values are set per-run in `main()`, alongside `SIZE_OF_POPULATION` (which
+*is* still a compile-time constant).
 
-The occupation-grid signature that partitions the search space into STN
-nodes is deliberately *not* computed here — its cell size is a
-post-processing choice, and logging raw occupied positions lets any cell
-size be recomputed later without rerunning the algorithm.
+**Columns**: `algorithm,instance,run_id,vector_id,generation,iteration,
+f_cost,f_power,weight1,weight2,occupied` — matches `STN_MoWFLOP.pdf`
+§10.2's minimum log fields. Notes:
+- `algorithm`/`instance` are literal columns, not just encoded in the filename.
+- `iteration` is a sequential recording index (0,1,2,...); `generation` is
+  the raw generation number (0, `STN_LOGGER_INTERVAL`, 2×`STN_LOGGER_INTERVAL`, ...)
+  — kept alongside `iteration` beyond the spec's minimum, useful for debugging.
+- `weight1`/`weight2` are that row's vector's literal weights — redundant
+  with `vector_id` (`build_weight_vector` is deterministic) but avoids a
+  join step before feeding this into `create.R`.
+- `occupied` is the space-separated list of global candidate indices
+  holding a turbine (sorted ascending), decodable through
+  `<instance>_<algo>_candidates.csv`.
+- `f_cost` is positive and minimized; `f_power` is positive and maximized.
 
-The STN's `STN_LOGGER_NUM_VECTORS` weight vectors are generated the same
-way as MOEA/D's own decomposition (`build_weight_vector`, uniform between
-`(1,0)` and `(0,1)`), but are a separate, smaller set — MOEA/D's own
-`SIZE_OF_POPULATION` internal vectors are unaffected and still drive its
-mating/replacement. Because of that, `population[j]` in MOEA/D is *not*
-aligned with the STN's vector `j`: every generation logged, both
-algorithms call `select_representatives` (`stn_logger.h`) to pick, for
-each STN vector, the population member minimising `calculate_gte` against
-it and the current `z_point`. This makes both algorithms observed the
-same way, at the STN's coarser resolution — an external instrumentation
-layer imposed by the experimenter, not part of either algorithm, and
-should be declared as such in any methodology write-up.
+**Design notes:**
+- The occupation-grid signature that eventually partitions the search
+  space into STN nodes is deliberately *not* computed here — cell size is
+  a post-processing choice, so logging raw occupied positions lets any
+  cell size be recomputed later without rerunning the algorithm.
+- The STN's `STN_LOGGER_NUM_VECTORS` weight vectors are a separate,
+  smaller set from MOEA/D's own `SIZE_OF_POPULATION` internal
+  decomposition vectors (generated the same way — `build_weight_vector`,
+  uniform between `(1,0)` and `(0,1)` — but MOEA/D's own vectors are
+  unaffected and still drive its mating/replacement). Because of that,
+  `population[j]` is *not* aligned with the STN's vector `j`: every
+  generation logged, both algorithms call `select_representatives`
+  (`stn_logger.h`) to pick, for each STN vector, the population member
+  minimising `calculate_gte` against it and the current `z_point`. This
+  observes both algorithms the same way, at the STN's coarser resolution
+  — an external instrumentation layer, not part of either algorithm, and
+  should be declared as such in any methodology write-up.
+- Sampling every `STN_LOGGER_INTERVAL`-th generation means a run's true
+  terminal state is only captured if its last generation happens to be a
+  multiple of the interval. If exact terminal nodes matter for a metric
+  (e.g. `n_end`), account for this in post-processing.
 
-Sampling every `STN_LOGGER_INTERVAL`-th generation means the very last
-generation of a run is only captured in the log if it happens to be a
-multiple of the interval — the trajectory's true terminal state can be
-missed. If exact terminal nodes matter for a metric (e.g. `n_end` in the
-STN reference model), account for this in post-processing or force one
-extra log call after the loop.
-
-After a short local run (pass a small `stop_criteria`, e.g. `20000`, as the
-6th CLI arg — see "Run" above), check the output. There's no automated
-validator script committed yet (`validate_stn_log.py` was referenced by an
-older draft of this doc but never actually added to the repo) — use these
-manual checks instead, run from `source_code/`:
+**Validating a run locally**: after a short test (small `stop_criteria`,
+e.g. `20000`, as the 6th CLI arg), run these manual checks from
+`source_code/` (no output beyond headers on any of them means the log is
+consistent):
 
 ```bash
 file="<output_dir>/<instance>_<algo>_stn.csv"
 
-# every row should have tau_total turbines occupied (column 11: algorithm,
-# instance, run_id, vector_id, generation, iteration, f_cost, f_power,
-# weight1, weight2, occupied)
+# every row should have tau_total turbines occupied (column 11)
 awk -F',' 'NR>1{n=split($11,a," "); if(n!=EXPECTED_TAU) print "line " NR ": " n " turbines"}' "$file"
 
-# sampled generations should be 0, STN_LOGGER_INTERVAL, 2*STN_LOGGER_INTERVAL, ...
+# sampled generations should be 0, STN_LOGGER_INTERVAL, 2*STN_LOGGER_INTERVAL, ... (column 5)
 awk -F',' 'NR>1{print $5}' "$file" | sort -n -u
 
-# iteration should be 0, 1, 2, ... (sequential, unlike generation above)
+# iteration should be 0, 1, 2, ... sequential, unlike generation above (column 6)
 awk -F',' 'NR>1{print $6}' "$file" | sort -n -u
 
-# no vector_id should have a repeated or out-of-order generation
-# (BEGIN{prev_v=-1} avoids a false positive on vector_id 0: an
-# uninitialized awk variable compares equal to "0" by default, which
-# collides with vector 0 specifically)
+# no vector_id (col 4) should have a repeated or out-of-order generation (col 5)
+# (BEGIN{prev_v=-1} avoids a false positive on vector_id 0: an uninitialized
+# awk variable compares equal to "0" by default, colliding with vector 0)
 awk -F',' 'NR>1{print $4","$5}' "$file" | sort -t, -k1,1n -k2,2n | \
   awk -F',' 'BEGIN{prev_v=-1} prev_v==$1 && $2<=prev_g {print "order broken in vector " $1} {prev_v=$1; prev_g=$2}'
 ```
-No output beyond headers on any of the three means the log is consistent.
+
+### The STN instance set (Cazzaro/Pisinger "New Sites" dataset)
+
+The instance set selected for the STN experiments (41, 48, 101, 178, 192,
+202, 203, 440, 465, 488) refers to the **Cazzaro/Pisinger real-world
+instance set** ("New Sites"), **not** the 300 synthetic instances already
+bundled under `instances/site/`. The two sets reuse the same numeric IDs
+for completely different wind farms (e.g. bundled `instances/site/41` has
+1 zone/48 turbines; New Sites' instance `41` has 3 zones/123 turbines) —
+using the wrong one silently runs the wrong experiment.
+
+The full New Sites collection (501 instances, ~700MB, `wflop_instances/`
+at the repo root) is committed **in full**, not just this instance set's
+10 — `git push`/`git pull` alone gets everything, no separate
+data-transfer step, and running any of the other 490+ instances later
+needs no re-setup.
+
+`instance_info.cpp` resolves instances through a fixed path
+(`../instances/site/<instance>/...`), so pointing binaries at
+`wflop_instances/` directly isn't possible without a C++ change. Instead,
+referencing an instance as **`ns<id>`** anywhere (an instances file,
+directly on the CLI) makes `run_one.sh` auto-create the symlink
+`instances/site/ns<id>` → `wflop_instances/New Sites/<id>` the first time
+that instance is used — no separate setup step. The `ns` prefix just
+avoids colliding with the bundled instance of the same number; a plain
+numeric ID still means the bundled one, unaffected. These symlinks aren't
+committed (machine-specific, regenerated automatically wherever
+`wflop_instances/` exists — see `.gitignore`).
+
+An instances file (what `batch.sh` reads) can freely mix plain and
+`ns`-prefixed IDs on separate lines, in any combination — nothing
+validates the format, each line is just passed straight through.
+`instances_stn10.txt` lists the STN instance set as `ns`-prefixed IDs.
+
+To run every instance of one dataset instead (e.g. if more of these 500+
+real-world instances end up needed later):
+
+```bash
+seq 1 300 > instances_all_bundled.txt              # all 300 bundled synthetic instances
+seq 0 500 | sed 's/^/ns/' > instances_all_new.txt  # all 501 Cazzaro/Pisinger instances
+```
+**Concurrency warning**: `batch.sh` (below) launches one process per line,
+all at once, with no cap — fine for 10 instances, but 300 or 501
+concurrent processes will likely exceed available cores. Check core
+availability and chunk into smaller batches first.
 
 ### Running a campaign
 
-`meta_heuristics/scripts/run_one.sh` runs exactly one `(instance, algo,
-stn_p, stn_interval, run_id)` combination and organizes its output under
+Three scripts in `meta_heuristics/scripts/`, layered:
+
+**`run_one.sh`** — runs exactly one `(instance, algo, stn_p, stn_interval,
+run_id)` combination, output under
 `raw_results/meta_heuristics_stn/<algo>/<instance>/p<stn_p>_i<stn_interval>/<run_id>/`:
 
 ```bash
 cd source_code
 ./meta_heuristics/scripts/run_one.sh 41 moead 0 1000000 30 10 10 50
 ```
+- **Idempotent**: skips a combination whose `_stn.csv` already exists —
+  safe to interrupt and resume. `stn_p`/`stn_interval` are part of the
+  output path specifically so sweeping P actually works: re-running the
+  same `(instance, algo, run_id)` with a *different* P lands in a
+  different directory, instead of finding the previous P's `_stn.csv`
+  already there and silently skipping.
+- `_candidates.csv` is instance-only, so `run_one.sh` keeps one canonical
+  copy per instance under `raw_results/meta_heuristics_stn/candidates/`
+  and symlinks (relative, portable) it into every run's directory,
+  instead of letting the ~290KB table regenerate in every output
+  directory a campaign creates.
+- Also the unit to call directly from a real HPC job scheduler, one
+  job/task per combination — no scheduler-specific logic baked in.
 
-- Idempotent: re-running skips a combination whose `_stn.csv` already
-  exists — safe to interrupt and resume. `stn_p`/`stn_interval` are part of
-  the output path specifically so this stays safe: re-running the same
-  `(instance, algo, run_id)` with a *different* P (e.g. sweeping 10/50/100
-  as requested) lands in a different directory and actually runs, instead
-  of finding the previous P's `_stn.csv` already there and silently
-  skipping.
-- `_candidates.csv` is instance-only, so `run_one.sh` keeps a single
-  canonical copy per instance under `raw_results/meta_heuristics_stn/
-  candidates/` and symlinks (relative, portable across machines) it into
-  every run's directory, instead of letting the ~290KB table get
-  regenerated in every output directory a full campaign creates.
-- This is also the unit to call directly from a real HPC job
-  scheduler if one becomes available (one job/task per combination) —
-  there's no scheduler-specific logic baked into it.
+**`run_instance.sh`** — for one instance, loops over `{algos} ×
+run_id 0..num_runs-1` calling `run_one.sh` for each, sequentially.
 
-For the actual supercomputer run, use `batch.sh` below rather than looping
-`run_one.sh` yourself — it's the fan-out layer.
-
-### STN experiment instances (Cazzaro/Pisinger "New Sites" dataset)
-
-The instance set selected for the STN experiments (41, 48, 101, 178, 192,
-202, 203, 440, 465, 488) refers to the **Cazzaro/Pisinger real-world
-instance set** ("New Sites"), **not** the 300 synthetic instances already
-bundled under `instances/site/`. The two sets happen to reuse the same
-numeric IDs for completely different wind farms (e.g. bundled
-`instances/site/41` has 1 zone/48 turbines; New Sites' instance `41` has
-3 zones/123 turbines) — using the wrong one silently runs the wrong
-experiment.
-
-The full New Sites collection (501 instances, ~700MB, `wflop_instances/`
-at the repo root) is committed **in full**, not just this instance set's 10 —
-so `git push`/`git pull` alone gets everything onto the supercomputer, no
-separate data-transfer step, and running any of the other 490+ instances
-later needs no re-setup.
-
-`instance_info.cpp` resolves instances through a fixed path
-(`../instances/site/<instance>/...`), so pointing the binaries at
-`wflop_instances/` directly isn't possible without a C++ change. Instead,
-referencing an instance as **`ns<id>`** anywhere (an instances file,
-directly on the CLI) makes `run_one.sh` auto-create the symlink
-`instances/site/ns<id>` → `wflop_instances/New Sites/<id>` the first time
-that instance is actually used — no separate setup step. The `ns` prefix
-just avoids colliding with the bundled instance of the same number; a
-plain numeric ID still means the bundled one, unaffected. These symlinks
-aren't committed themselves (machine-specific, regenerated automatically
-wherever `wflop_instances/` exists — see `.gitignore`).
-
-An instances file (what `batch.sh` reads) can freely mix plain and
-`ns`-prefixed IDs on separate lines — nothing validates the format, each
-line is just passed straight through, and both kinds can appear in the
-same run. `instances_stn10.txt` lists the STN instance set as
-`ns`-prefixed IDs.
-
-To run every instance of one dataset (not both mixed) — e.g. if more of
-these 500+ real-world instances end up needed later:
-
-```bash
-seq 1 300 > instances_all_bundled.txt              # all 300 bundled synthetic instances
-seq 0 500 | sed 's/^/ns/' > instances_all_new.txt  # all 501 Cazzaro/Pisinger instances
-```
-
-**Concurrency warning**: `batch.sh` launches one process per line, all at
-once, with no cap — fine for 10 instances, but 300 or 501 concurrent
-processes will likely exceed available cores on any real machine. Check
-core availability and consider chunking into smaller batches before
-running a full-dataset instances file.
-
-### Running the STN instance batch with `nohup`
-
-`meta_heuristics/scripts/batch.sh` + `run_instance.sh` adapt Gustavo/João's
-`MO_WFLOP-experiment-runner` two-file split (`scripts/batch.sh` +
-`scripts/main.sh`) directly — same idiom, same layering:
-
-- `run_instance.sh <instance> [algos] [num_runs] ...` — one instance, loops
-  over `{algos} × run_id 0..num_runs-1` calling `run_one.sh` for each.
-  Equivalent to their `main.sh` (which loops runs calling `comolsd.sh`).
-- `batch.sh [instances_file] [algos] [num_runs] ...` — one
-  `nohup run_instance.sh <instance> ... &> logs/<instance>_p<stn_p>_i<stn_interval>.log &`
-  per instance, no scheduler, no concurrency cap, no final `wait` — the
-  exact pattern their `batch.sh` uses (`nohup "$script" $batch &> logfile
-  &`) to fan out across instances. The only real differences: the instance
-  list comes from a file instead of hardcoded literals (defaults to
-  `instances_stn10.txt`, the 10-instance STN set: 41, 48, 101, 178, 192,
-  202, 203, 440, 465, 488), and it's one process per instance rather than
-  per ~10-instance chunk (their original use case had 300+ instances to
-  distribute; this instance set only has 10).
+**`batch.sh`** — the entry point you actually call. Reads an instances
+file (default `instances_stn10.txt`) and launches, via `nohup`, one
+`run_instance.sh <instance> ...` process per instance, all in parallel:
 
 ```bash
 cd source_code
 ./meta_heuristics/scripts/batch.sh                      # defaults: instances_stn10.txt, moead+nsga2, 10 runs
 ./meta_heuristics/scripts/batch.sh my_instances.txt "moead nsga2" 10 1000000 30 10 100 50
 ```
+- Logs land in `source_code/logs/<instance>_p<stn_p>_i<stn_interval>.log`;
+  check progress with `tail -f logs/*.log` or `ps -p <pid>` (PIDs are
+  printed when `batch.sh` launches).
+- Composes with `run_one.sh`'s idempotency — safe to re-launch to resume
+  after an interruption.
 
-To sweep P (e.g. 10/50/100) with the interval held fixed, call `batch.sh`
-directly, once per P value — each lands in its own output directory and
-log file (see above), nothing gets skipped or overwritten between them.
-Since `batch.sh` only launches detached `nohup` background jobs and
-returns immediately, calling it 3 times back to back like this actually
-runs the 3 P's **concurrently**, not sequentially:
+**Sweeping P** (e.g. 10/50/100) with the interval held fixed: call
+`batch.sh` directly, once per P value. Since `batch.sh` only launches
+detached `nohup` jobs and returns immediately, three calls back to back
+run the P values **concurrently**, not sequentially:
 
 ```bash
 ./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 10 1000000 30 10 10  50
 ./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 10 1000000 30 10 50  50
 ./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 10 1000000 30 10 100 50
 ```
+Each P lands in its own output directory/log — nothing gets skipped or
+overwritten between them. This needs enough free cores to run all of it
+at once (10 instances × 2 algorithms × 3 P values = 60 concurrent
+single-threaded processes) — check availability first (`nproc`, `uptime`,
+`top`) if the machine is shared. Fewer P values per invocation, or waiting
+for one to finish before the next, trades wall-clock time for a smaller
+concurrent footprint.
 
-This needs enough free cores to run all of it at once (10 instances × 2
-algorithms × 3 P values = 60 concurrent single-threaded processes) — check
-availability first (`nproc`, `uptime`, `top`) if the machine is shared.
-Running fewer P values per invocation, or waiting for one to finish before
-launching the next, trades wall-clock time for a smaller concurrent
-footprint.
-
-- Logs land in `source_code/logs/<instance>_p<stn_p>_i<stn_interval>.log`;
-  check progress with `tail -f logs/*.log` or `ps -p <pid>` (PIDs are
-  printed when `batch.sh` launches).
-- Composes with `run_one.sh`'s idempotency — safe to re-launch `batch.sh`
-  to resume after an interruption, already-complete runs are skipped.
-- `run_one.sh`'s idempotent skip-if-done check and its `_candidates.csv`
-  dedup/symlink logic have no equivalent in Gustavo/João's scripts — their
-  `comolsd` binary doesn't write a shared per-instance file the way our
-  `STNLogger` does, so there was nothing to adapt there; both are
-  necessary additions specific to our own logger's behavior, not
-  deviations from their pattern.
+**Provenance**: `run_instance.sh`/`batch.sh` adapt Gustavo/João's
+`MO_WFLOP-experiment-runner` two-file split (`scripts/main.sh` +
+`scripts/batch.sh`) directly — same idiom (`nohup "$script" ... &>
+logfile &`, no scheduler, no concurrency cap, no final `wait`), same
+layering. Real differences: the instance list comes from a file instead
+of hardcoded literals, and it's one process per instance rather than per
+~10-instance chunk (their original use case had 300+ instances to
+distribute; this set only has 10). `run_one.sh`'s idempotency and
+`_candidates.csv` dedup have no equivalent in their scripts — their
+`comolsd` binary doesn't write a shared per-instance file the way
+`STNLogger` does, so there was nothing to adapt there; both are
+necessary additions, not deviations from their pattern.
 
 ## 👥 Authors  
 | Name | Affiliation | Contact |  
