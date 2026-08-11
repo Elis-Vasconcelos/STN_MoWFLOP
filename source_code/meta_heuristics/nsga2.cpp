@@ -13,6 +13,8 @@ int stn_run_id = 0;
 string algorithm = "nsga2";
 string instance = "A";
 string root_folder = "./";
+int STN_LOGGER_NUM_VECTORS = 10;
+int STN_LOGGER_INTERVAL = 50;
 
 int main(int argc, char* argv[]){
 
@@ -34,6 +36,16 @@ int main(int argc, char* argv[]){
         stop_criteria = stoi(argv[6]);
     }
 
+    // P (número de vetores de peso da STN) e o intervalo de amostragem,
+    // sweepable sem recompilar
+    if(argc >= 8){
+        STN_LOGGER_NUM_VECTORS = stoi(argv[7]);
+    }
+
+    if(argc >= 9){
+        STN_LOGGER_INTERVAL = stoi(argv[8]);
+    }
+
     string path;
 
     int num_neighbors = 10;
@@ -52,7 +64,9 @@ int main(int argc, char* argv[]){
     cout << "Wind: " << wind << endl;
     cout << "Angle: " << angle << endl;
     cout << "Run id: " << stn_run_id << endl;
-    cout << "Stop criteria: " << stop_criteria << endl << endl;
+    cout << "Stop criteria: " << stop_criteria << endl;
+    cout << "STN P (num vectors): " << STN_LOGGER_NUM_VECTORS << endl;
+    cout << "STN logger interval: " << STN_LOGGER_INTERVAL << endl << endl;
 
     cout << "Run time:" << endl;
     

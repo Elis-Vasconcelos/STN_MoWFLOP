@@ -1,0 +1,9 @@
+# Scratch space for local test/demo runs (e.g. short STN logger validation
+# runs) -- never meant to be committed, kept out of /tmp so it's easy to
+# find in a file manager instead of buried in the OS temp dir. Local-only,
+# not tracked at all (not even as an empty dir).
+/tmp_demo/
+
+# Compiled binaries (make/make rebuild in source_code/meta_heuristics)
+source_code/meta_heuristics/moead
+source_code/meta_heuristics/nsga2

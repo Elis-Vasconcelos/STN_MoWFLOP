@@ -68,8 +68,8 @@ correctly when the process is launched from `source_code/`:
 
 ```bash
 cd source_code   # NOT source_code/meta_heuristics
-./meta_heuristics/moead <instance_id> [output_dir] [angle] [wind] [run_id] [stop_criteria]
-./meta_heuristics/nsga2 <instance_id> [output_dir] [angle] [wind] [run_id] [stop_criteria]
+./meta_heuristics/moead <instance_id> [output_dir] [angle] [wind] [run_id] [stop_criteria] [stn_p] [stn_interval]
+./meta_heuristics/nsga2 <instance_id> [output_dir] [angle] [wind] [run_id] [stop_criteria] [stn_p] [stn_interval]
 ```
 
 Arguments are strictly positional — to reach `run_id` you must also pass
@@ -89,6 +89,11 @@ Arguments are strictly positional — to reach `run_id` you must also pass
   concatenated. Defaults to `0`.
 - `[stop_criteria]` — number of solution evaluations to stop after;
   defaults to 1,000,000. Lower it for a quick smoke test.
+- `[stn_p]` — number of STN weight vectors (`STN_LOGGER_NUM_VECTORS`);
+  defaults to `10`. Runtime arg, not a compile-time constant, so sweeping
+  P (e.g. 10/50/100) doesn't require rebuilding.
+- `[stn_interval]` — STN sampling interval in generations
+  (`STN_LOGGER_INTERVAL`); defaults to `50`.
 
 On a modern desktop core, a full 1,000,000-evaluation run of a
 75-mobile-turbine instance (e.g. instance `1`) took **~25 minutes**
@@ -118,8 +123,11 @@ snapshot files.
 `<instance>_<algo>_stn.csv` records, every `STN_LOGGER_INTERVAL`
 generations, the representative solution of each of `STN_LOGGER_NUM_VECTORS`
 weight vectors — the raw data a Search Trajectory Network is built from
-later. Both constants live in `headers/globals.h`, next to
-`SIZE_OF_POPULATION`. Columns: `run_id,vector_id,generation,f_cost,f_power,
+later. Both are **runtime CLI args** (`stn_p`/`stn_interval`, see "Run"
+above), defaulting to `10`/`50` when omitted — `headers/globals.h` only
+declares them (`extern`); the actual values are set per-run in
+`moead.cpp`/`nsga2.cpp`'s `main()`, alongside `SIZE_OF_POPULATION` (which
+*is* still a compile-time constant). Columns: `run_id,vector_id,generation,f_cost,f_power,
 weight1,weight2,occupied`, where `weight1`/`weight2` are that row's vector's
 literal weights (redundant with `vector_id`, since `build_weight_vector` is
 deterministic, but avoids a join step before feeding this into `create.R`)
@@ -178,29 +186,68 @@ awk -F',' 'NR>1{print $2","$3}' "$file" | sort -t, -k1,1n -k2,2n | \
 ```
 No output beyond headers on any of the three means the log is consistent.
 
-### Running a full campaign
+### Running a campaign
 
-`meta_heuristics/scripts/run_one.sh` and `run_campaign.sh` automate running
-many instances/runs/algorithms and organize the output under
+`meta_heuristics/scripts/run_one.sh` runs exactly one `(instance, algo,
+run_id)` combination and organizes its output under
 `raw_results/meta_heuristics_stn/<algo>/<instance>/<run_id>/`:
 
 ```bash
 cd source_code
-seq 1 300 > instances.txt
-./meta_heuristics/scripts/run_campaign.sh instances.txt 20   # 20 runs, full stop_criteria (1e6)
+./meta_heuristics/scripts/run_one.sh 41 moead 0 1000000 30 10 10 50
 ```
 
-- Idempotent: re-running skips any `(instance, algo, run_id)` whose
-  `_stn.csv` already exists — safe to interrupt and resume.
+- Idempotent: re-running skips a combination whose `_stn.csv` already
+  exists — safe to interrupt and resume.
 - `_candidates.csv` is instance-only, so `run_one.sh` keeps a single
   canonical copy per instance under `raw_results/meta_heuristics_stn/
   candidates/` and symlinks (relative, portable across machines) it into
   every run's directory, instead of letting the ~290KB table get
-  regenerated in every one of the `instances × runs × 2` output
-  directories a full campaign creates.
-- Sequential on purpose. To parallelize on the supercomputer's actual job
-  scheduler, call `run_one.sh <instance> <algo> <run_id> [stop_criteria]`
-  directly, one combination per job/task, instead of `run_campaign.sh`.
+  regenerated in every output directory a full campaign creates.
+- This is also the unit to call directly from a real HPC job
+  scheduler if one becomes available (one job/task per combination) —
+  there's no scheduler-specific logic baked into it.
+
+For the actual supercomputer run, use `batch.sh` below rather than looping
+`run_one.sh` yourself — it's the fan-out layer.
+
+### Running the professor's 10-instance batch with `nohup`
+
+`meta_heuristics/scripts/batch.sh` + `run_instance.sh` adapt Gustavo/João's
+`MO_WFLOP-experiment-runner` two-file split (`scripts/batch.sh` +
+`scripts/main.sh`) directly — same idiom, same layering:
+
+- `run_instance.sh <instance> [algos] [num_runs] ...` — one instance, loops
+  over `{algos} × run_id 0..num_runs-1` calling `run_one.sh` for each.
+  Equivalent to their `main.sh` (which loops runs calling `comolsd.sh`).
+- `batch.sh [instances_file] [algos] [num_runs] ...` — one
+  `nohup run_instance.sh <instance> ... &> logs/<instance>.log &` per
+  instance, no scheduler, no concurrency cap, no final `wait` — the exact
+  pattern their `batch.sh` uses (`nohup "$script" $batch &> logfile &`) to
+  fan out across instances. The only real differences: the instance list
+  comes from a file instead of hardcoded literals (defaults to
+  `instances_professor10.txt`, the 10 instances Islame chose: 41, 48, 101,
+  178, 192, 202, 203, 440, 465, 488), and it's one process per instance
+  rather than per ~10-instance chunk (they had 300+ instances to spread
+  out; this batch only has 10).
+
+```bash
+cd source_code
+./meta_heuristics/scripts/batch.sh                      # defaults: instances_professor10.txt, moead+nsga2, 20 runs
+./meta_heuristics/scripts/batch.sh my_instances.txt "moead nsga2" 20 1000000 30 10 100 10
+```
+
+- Logs land in `source_code/logs/<instance>.log`; check progress with
+  `tail -f logs/*.log` or `ps -p <pid>` (PIDs are printed when `batch.sh`
+  launches).
+- Composes with `run_one.sh`'s idempotency — safe to re-launch `batch.sh`
+  to resume after an interruption, already-complete runs are skipped.
+- `run_one.sh`'s idempotent skip-if-done check and its `_candidates.csv`
+  dedup/symlink logic have no equivalent in Gustavo/João's scripts — their
+  `comolsd` binary doesn't write a shared per-instance file the way our
+  `STNLogger` does, so there was nothing to adapt there; both are
+  necessary additions specific to our own logger's behavior, not
+  deviations from their pattern.
 
 ## 👥 Authors  
 | Name | Affiliation | Contact |  
