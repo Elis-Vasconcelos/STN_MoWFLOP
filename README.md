@@ -189,8 +189,8 @@ No output beyond headers on any of the three means the log is consistent.
 ### Running a campaign
 
 `meta_heuristics/scripts/run_one.sh` runs exactly one `(instance, algo,
-run_id)` combination and organizes its output under
-`raw_results/meta_heuristics_stn/<algo>/<instance>/<run_id>/`:
+stn_p, stn_interval, run_id)` combination and organizes its output under
+`raw_results/meta_heuristics_stn/<algo>/<instance>/p<stn_p>_i<stn_interval>/<run_id>/`:
 
 ```bash
 cd source_code
@@ -198,7 +198,12 @@ cd source_code
 ```
 
 - Idempotent: re-running skips a combination whose `_stn.csv` already
-  exists — safe to interrupt and resume.
+  exists — safe to interrupt and resume. `stn_p`/`stn_interval` are part of
+  the output path specifically so this stays safe: re-running the same
+  `(instance, algo, run_id)` with a *different* P (e.g. sweeping 10/50/100
+  as requested) lands in a different directory and actually runs, instead
+  of finding the previous P's `_stn.csv` already there and silently
+  skipping.
 - `_candidates.csv` is instance-only, so `run_one.sh` keeps a single
   canonical copy per instance under `raw_results/meta_heuristics_stn/
   candidates/` and symlinks (relative, portable across machines) it into
@@ -221,11 +226,11 @@ For the actual supercomputer run, use `batch.sh` below rather than looping
   over `{algos} × run_id 0..num_runs-1` calling `run_one.sh` for each.
   Equivalent to their `main.sh` (which loops runs calling `comolsd.sh`).
 - `batch.sh [instances_file] [algos] [num_runs] ...` — one
-  `nohup run_instance.sh <instance> ... &> logs/<instance>.log &` per
-  instance, no scheduler, no concurrency cap, no final `wait` — the exact
-  pattern their `batch.sh` uses (`nohup "$script" $batch &> logfile &`) to
-  fan out across instances. The only real differences: the instance list
-  comes from a file instead of hardcoded literals (defaults to
+  `nohup run_instance.sh <instance> ... &> logs/<instance>_p<stn_p>_i<stn_interval>.log &`
+  per instance, no scheduler, no concurrency cap, no final `wait` — the
+  exact pattern their `batch.sh` uses (`nohup "$script" $batch &> logfile
+  &`) to fan out across instances. The only real differences: the instance
+  list comes from a file instead of hardcoded literals (defaults to
   `instances_professor10.txt`, the 10 instances Islame chose: 41, 48, 101,
   178, 192, 202, 203, 440, 465, 488), and it's one process per instance
   rather than per ~10-instance chunk (they had 300+ instances to spread
@@ -237,9 +242,19 @@ cd source_code
 ./meta_heuristics/scripts/batch.sh my_instances.txt "moead nsga2" 20 1000000 30 10 100 10
 ```
 
-- Logs land in `source_code/logs/<instance>.log`; check progress with
-  `tail -f logs/*.log` or `ps -p <pid>` (PIDs are printed when `batch.sh`
-  launches).
+To sweep P (e.g. the requested 10/50/100), run `batch.sh` once per value —
+each lands in its own output directory and log file (see above), nothing
+gets skipped or overwritten between sweeps:
+
+```bash
+./meta_heuristics/scripts/batch.sh instances_professor10.txt "moead nsga2" 20 1000000 30 10 10  50
+./meta_heuristics/scripts/batch.sh instances_professor10.txt "moead nsga2" 20 1000000 30 10 50  50
+./meta_heuristics/scripts/batch.sh instances_professor10.txt "moead nsga2" 20 1000000 30 10 100 50
+```
+
+- Logs land in `source_code/logs/<instance>_p<stn_p>_i<stn_interval>.log`;
+  check progress with `tail -f logs/*.log` or `ps -p <pid>` (PIDs are
+  printed when `batch.sh` launches).
 - Composes with `run_one.sh`'s idempotency — safe to re-launch `batch.sh`
   to resume after an interruption, already-complete runs are skipped.
 - `run_one.sh`'s idempotent skip-if-done check and its `_candidates.csv`

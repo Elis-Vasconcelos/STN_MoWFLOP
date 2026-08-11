@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Roda uma única combinação (instância, algoritmo, run_id) e organiza a saída
-# em raw_results/meta_heuristics_stn/<algo>/<instance>/<run_id>/ (relativo à
-# raiz do repo).
+# Roda uma única combinação (instância, algoritmo, P, intervalo, run_id) e
+# organiza a saída em
+# raw_results/meta_heuristics_stn/<algo>/<instance>/p<stn_p>_i<stn_interval>/<run_id>/
+# (relativo à raiz do repo).
 #
 # Uso: ./run_one.sh <instance_id> <moead|nsga2> <run_id> [stop_criteria] [angle] [wind] [stn_p] [stn_interval]
 #
@@ -40,7 +41,11 @@ if [[ ! -x "./meta_heuristics/$algo" ]]; then
   exit 1
 fi
 
-out_dir="../raw_results/meta_heuristics_stn/${algo}/${instance}/${run_id}/"
+# stn_p/stn_interval fazem parte do caminho -- sem isso, rodar a mesma
+# combinação (instância, algo, run_id) de novo com um P diferente acharia
+# o _stn.csv do P anterior já ali, pularia por engano (idempotência) e a
+# run com o novo P nunca aconteceria de verdade
+out_dir="../raw_results/meta_heuristics_stn/${algo}/${instance}/p${stn_p}_i${stn_interval}/${run_id}/"
 mkdir -p "$out_dir"
 
 stn_csv="${out_dir}${instance}_${algo}_stn.csv"

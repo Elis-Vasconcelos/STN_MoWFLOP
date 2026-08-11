@@ -40,7 +40,11 @@ mkdir -p logs
 
 while IFS= read -r instance; do
   [[ -z "$instance" ]] && continue
+  # stn_p/stn_interval no nome do log também -- senão relançar batch.sh com
+  # um P diferente sobrescreve o log da rodada anterior, mesmo que os dados
+  # (agora em diretórios separados, ver run_one.sh) fiquem corretos
+  log="logs/${instance}_p${stn_p}_i${stn_interval}.log"
   nohup ./meta_heuristics/scripts/run_instance.sh "$instance" "$algos" "$num_runs" "$stop_criteria" "$angle" "$wind" "$stn_p" "$stn_interval" \
-    &> "logs/${instance}.log" &
-  echo "[batch] instance=$instance pid=$! log=logs/${instance}.log"
+    &> "$log" &
+  echo "[batch] instance=$instance pid=$! log=$log"
 done < "$instances_file"
