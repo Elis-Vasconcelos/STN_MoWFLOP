@@ -216,7 +216,56 @@ cd source_code
 For the actual supercomputer run, use `batch.sh` below rather than looping
 `run_one.sh` yourself — it's the fan-out layer.
 
-### Running the professor's 10-instance batch with `nohup`
+### STN experiment instances (Cazzaro/Pisinger "New Sites" dataset)
+
+The instance set selected for the STN experiments (41, 48, 101, 178, 192,
+202, 203, 440, 465, 488) refers to the **Cazzaro/Pisinger real-world
+instance set** ("New Sites"), **not** the 300 synthetic instances already
+bundled under `instances/site/`. The two sets happen to reuse the same
+numeric IDs for completely different wind farms (e.g. bundled
+`instances/site/41` has 1 zone/48 turbines; New Sites' instance `41` has
+3 zones/123 turbines) — using the wrong one silently runs the wrong
+experiment.
+
+The full New Sites collection (501 instances, ~700MB, `wflop_instances/`
+at the repo root) is committed **in full**, not just this instance set's 10 —
+so `git push`/`git pull` alone gets everything onto the supercomputer, no
+separate data-transfer step, and running any of the other 490+ instances
+later needs no re-setup.
+
+`instance_info.cpp` resolves instances through a fixed path
+(`../instances/site/<instance>/...`), so pointing the binaries at
+`wflop_instances/` directly isn't possible without a C++ change. Instead,
+referencing an instance as **`ns<id>`** anywhere (an instances file,
+directly on the CLI) makes `run_one.sh` auto-create the symlink
+`instances/site/ns<id>` → `wflop_instances/New Sites/<id>` the first time
+that instance is actually used — no separate setup step. The `ns` prefix
+just avoids colliding with the bundled instance of the same number; a
+plain numeric ID still means the bundled one, unaffected. These symlinks
+aren't committed themselves (machine-specific, regenerated automatically
+wherever `wflop_instances/` exists — see `.gitignore`).
+
+An instances file (what `batch.sh` reads) can freely mix plain and
+`ns`-prefixed IDs on separate lines — nothing validates the format, each
+line is just passed straight through, and both kinds can appear in the
+same run. `instances_stn10.txt` lists the STN instance set as
+`ns`-prefixed IDs.
+
+To run every instance of one dataset (not both mixed) — e.g. if more of
+these 500+ real-world instances end up needed later:
+
+```bash
+seq 1 300 > instances_all_bundled.txt              # all 300 bundled synthetic instances
+seq 0 500 | sed 's/^/ns/' > instances_all_new.txt  # all 501 Cazzaro/Pisinger instances
+```
+
+**Concurrency warning**: `batch.sh` launches one process per line, all at
+once, with no cap — fine for 10 instances, but 300 or 501 concurrent
+processes will likely exceed available cores on any real machine. Check
+core availability and consider chunking into smaller batches before
+running a full-dataset instances file.
+
+### Running the STN instance batch with `nohup`
 
 `meta_heuristics/scripts/batch.sh` + `run_instance.sh` adapt Gustavo/João's
 `MO_WFLOP-experiment-runner` two-file split (`scripts/batch.sh` +
@@ -231,26 +280,36 @@ For the actual supercomputer run, use `batch.sh` below rather than looping
   exact pattern their `batch.sh` uses (`nohup "$script" $batch &> logfile
   &`) to fan out across instances. The only real differences: the instance
   list comes from a file instead of hardcoded literals (defaults to
-  `instances_professor10.txt`, the 10 instances Islame chose: 41, 48, 101,
-  178, 192, 202, 203, 440, 465, 488), and it's one process per instance
-  rather than per ~10-instance chunk (they had 300+ instances to spread
-  out; this batch only has 10).
+  `instances_stn10.txt`, the 10-instance STN set: 41, 48, 101, 178, 192,
+  202, 203, 440, 465, 488), and it's one process per instance rather than
+  per ~10-instance chunk (their original use case had 300+ instances to
+  distribute; this instance set only has 10).
 
 ```bash
 cd source_code
-./meta_heuristics/scripts/batch.sh                      # defaults: instances_professor10.txt, moead+nsga2, 20 runs
+./meta_heuristics/scripts/batch.sh                      # defaults: instances_stn10.txt, moead+nsga2, 20 runs
 ./meta_heuristics/scripts/batch.sh my_instances.txt "moead nsga2" 20 1000000 30 10 100 10
 ```
 
-To sweep P (e.g. the requested 10/50/100), run `batch.sh` once per value —
-each lands in its own output directory and log file (see above), nothing
-gets skipped or overwritten between sweeps:
+To sweep P (e.g. 10/50/100) with the interval held fixed, call `batch.sh`
+directly, once per P value — each lands in its own output directory and
+log file (see above), nothing gets skipped or overwritten between them.
+Since `batch.sh` only launches detached `nohup` background jobs and
+returns immediately, calling it 3 times back to back like this actually
+runs the 3 P's **concurrently**, not sequentially:
 
 ```bash
-./meta_heuristics/scripts/batch.sh instances_professor10.txt "moead nsga2" 20 1000000 30 10 10  50
-./meta_heuristics/scripts/batch.sh instances_professor10.txt "moead nsga2" 20 1000000 30 10 50  50
-./meta_heuristics/scripts/batch.sh instances_professor10.txt "moead nsga2" 20 1000000 30 10 100 50
+./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 20 1000000 30 10 10  1
+./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 20 1000000 30 10 50  1
+./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 20 1000000 30 10 100 1
 ```
+
+This needs enough free cores to run all of it at once (10 instances × 2
+algorithms × 3 P values = 60 concurrent single-threaded processes) — check
+availability first (`nproc`, `uptime`, `top`) if the machine is shared.
+Running fewer P values per invocation, or waiting for one to finish before
+launching the next, trades wall-clock time for a smaller concurrent
+footprint.
 
 - Logs land in `source_code/logs/<instance>_p<stn_p>_i<stn_interval>.log`;
   check progress with `tail -f logs/*.log` or `ps -p <pid>` (PIDs are

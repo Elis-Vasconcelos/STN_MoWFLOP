@@ -41,6 +41,27 @@ if [[ ! -x "./meta_heuristics/$algo" ]]; then
   exit 1
 fi
 
+# instâncias "ns<id>" referem ao dataset real da Cazzaro/Pisinger
+# ("New Sites", commitado por inteiro em wflop_instances/ -- ver
+# .gitignore), distinto das instâncias sintéticas já embutidas no repo
+# que reusam os mesmos números. Cria o symlink instances/site/ns<id> sob
+# demanda, na primeira vez que essa instância é usada -- não precisa
+# copiar nada nem rodar nenhum script separado antes, só referenciar
+# "ns<id>" no arquivo de instâncias.
+if [[ "$instance" =~ ^ns([0-9]+)$ ]]; then
+  numeric_id="${BASH_REMATCH[1]}"
+  site_link="../instances/site/${instance}"
+  if [[ ! -e "$site_link" ]]; then
+    new_sites_src="../wflop_instances/New Sites/${numeric_id}"
+    if [[ ! -d "$new_sites_src" ]]; then
+      echo "instância $instance: '$new_sites_src' não existe -- confira se wflop_instances/ foi clonado/atualizado" >&2
+      exit 1
+    fi
+    ln -sfn "../../wflop_instances/New Sites/${numeric_id}" "$site_link"
+    echo "[setup] criado $site_link -> $new_sites_src"
+  fi
+fi
+
 # stn_p/stn_interval fazem parte do caminho -- sem isso, rodar a mesma
 # combinação (instância, algo, run_id) de novo com um P diferente acharia
 # o _stn.csv do P anterior já ali, pularia por engano (idempotência) e a

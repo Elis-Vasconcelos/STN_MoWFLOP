@@ -5,13 +5,13 @@
 # sem `wait` final. Only diferenças reais: a lista de instâncias vem de um
 # arquivo em vez de literais hardcoded no script, e um processo por
 # instância em vez de lotes de ~10 (eles tinham 300+ instâncias pra
-# distribuir; o lote do professor tem só 10, não precisa agrupar). Chama
+# distribuir; este conjunto tem só 10, não precisa agrupar). Chama
 # run_instance.sh (nosso main.sh) em vez do main.sh deles.
 #
 # Uso: ./batch.sh [instances_file] [algos] [num_runs] [stop_criteria] [angle] [wind] [stn_p] [stn_interval]
 #
-# Ex.: ./batch.sh                                   # 10 instâncias do professor, moead+nsga2, 20 runs, defaults
-#      ./batch.sh instances_professor10.txt "moead" 20 1000000 30 10 100 10
+# Ex.: ./batch.sh                                   # 10 instâncias do conjunto STN, moead+nsga2, 20 runs, defaults
+#      ./batch.sh instances_stn10.txt "moead" 20 1000000 30 10 100 10
 #
 # Precisa ser chamado com cwd = source_code/ (mesmo requisito de run_one.sh).
 # Logs em source_code/logs/<instance>.log. Idempotente via run_one.sh: seguro
@@ -22,7 +22,7 @@ set -euo pipefail
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$script_dir/../.."   # scripts/ -> meta_heuristics/ -> source_code/
 
-instances_file="${1:-instances_professor10.txt}"
+instances_file="${1:-instances_stn10.txt}"
 algos="${2:-moead nsga2}"
 num_runs="${3:-20}"
 stop_criteria="${4:-1000000}"

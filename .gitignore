@@ -7,3 +7,15 @@
 # Compiled binaries (make/make rebuild in source_code/meta_heuristics)
 source_code/meta_heuristics/moead
 source_code/meta_heuristics/nsga2
+
+# wflop_instances/ (Cazzaro/Pisinger "New Sites" real-world instance set,
+# ~700MB, 501 instances) is intentionally NOT ignored -- committed in
+# full, since git is the transfer path to the supercomputer, and
+# hand-picking a subset now would just mean repeating this dance again
+# whenever more of these 500+ instances are needed later.
+#
+# instances/site/ns<id> are symlinks into it, created on demand by
+# run_one.sh the first time a given instance is actually used -- not
+# committed themselves (they're machine-specific relative symlinks,
+# regenerated automatically wherever wflop_instances/ exists).
+instances/site/ns*
