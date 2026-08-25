@@ -44,13 +44,15 @@ fi
 # instâncias "ns<id>" referem ao dataset real da Cazzaro/Pisinger
 # ("New Sites", commitado por inteiro em wflop_instances/ -- ver
 # .gitignore), distinto das instâncias sintéticas já embutidas no repo
-# que reusam os mesmos números. Cria o symlink instances/site/ns<id> sob
-# demanda, na primeira vez que essa instância é usada -- não precisa
-# copiar nada nem rodar nenhum script separado antes, só referenciar
-# "ns<id>" no arquivo de instâncias.
+# que reusam os mesmos números (ex.: instances/site/101 != wflop_instances/
+# New Sites/101 -- números diferentes, dados diferentes, confirmado). O
+# prefixo "ns" existe só pra resolver essa colisão específica -- por isso
+# esse caso continua com path construído direto (sem busca), sem ambiguidade
+# possível.
+site_link="../instances/site/${instance}"
+
 if [[ "$instance" =~ ^ns([0-9]+)$ ]]; then
   numeric_id="${BASH_REMATCH[1]}"
-  site_link="../instances/site/${instance}"
   if [[ ! -e "$site_link" ]]; then
     new_sites_src="../wflop_instances/New Sites/${numeric_id}"
     if [[ ! -d "$new_sites_src" ]]; then
@@ -60,6 +62,25 @@ if [[ "$instance" =~ ^ns([0-9]+)$ ]]; then
     ln -sfn "../../wflop_instances/New Sites/${numeric_id}" "$site_link"
     echo "[setup] criado $site_link -> $new_sites_src"
   fi
+elif [[ ! -e "$site_link" ]]; then
+  # Fallback genérico pra qualquer outra instância nova sob wflop_instances/
+  # (ex.: wflop_instances/sparse_instances/.../<name>/, o sweep de sparsity
+  # pra testar a degeneração da entropia de Shannon -- ver
+  # wflop_instances/README.md). Busca por um diretório com esse nome exato;
+  # erra alto (não escolhe silenciosamente) se achar zero ou mais de um,
+  # pra nunca introduzir uma colisão nova do jeito que "101" já tem.
+  mapfile -t matches < <(find "../wflop_instances" -mindepth 1 -maxdepth 4 -type d -name "$instance")
+  if [[ ${#matches[@]} -eq 0 ]]; then
+    echo "instância $instance: não encontrada em $site_link nem em ../wflop_instances/ -- confira o nome" >&2
+    exit 1
+  elif [[ ${#matches[@]} -gt 1 ]]; then
+    echo "instância $instance: nome ambíguo, encontrado em mais de um lugar sob ../wflop_instances/:" >&2
+    printf '  %s\n' "${matches[@]}" >&2
+    exit 1
+  fi
+  rel_target="$(realpath --relative-to="../instances/site" "${matches[0]}")"
+  ln -sfn "$rel_target" "$site_link"
+  echo "[setup] criado $site_link -> $rel_target"
 fi
 
 # stn_p/stn_interval fazem parte do caminho -- sem isso, rodar a mesma

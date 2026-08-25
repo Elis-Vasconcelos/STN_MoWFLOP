@@ -19,3 +19,10 @@ source_code/meta_heuristics/nsga2
 # committed themselves (they're machine-specific relative symlinks,
 # regenerated automatically wherever wflop_instances/ exists).
 instances/site/ns*
+
+# Same idea for any instance that doesn't match the ns<digits> pattern
+# (e.g. the Shannon-entropy sparsity-sweep instances under
+# wflop_instances/sparse_instances/ -- see wflop_instances/README.md) --
+# run_one.sh's generic fallback finds these by exact directory name under
+# wflop_instances/ and symlinks them on demand too, same as ns<digits>.
+instances/site/*_r1e-*
