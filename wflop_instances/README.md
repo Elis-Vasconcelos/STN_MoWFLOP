@@ -72,6 +72,67 @@ URL = {https://www.nrel.gov/docs/fy20osti/75698.pdf}
 }
 
 
+## Sparse instances (low turbines/available-positions ratio)
+
+`sparse_instances/` contains instances built specifically to test whether
+the thesis's Shannon-entropy metric degenerates once the turbines/available-
+positions ratio gets low enough (see `landscape-mo/papers/STN_MoWFLOP.pdf`
+§5.3 — its own worked example of degeneracy is τ/|P| ≈ 10⁻⁴, eq. 4). Every
+other instance in this dataset sits at ~[5e-3, 2e-2] (an uncontrolled side
+effect of `script.py`'s `uniform(0.005, 0.02)` density factor, not a
+parameter you can target); these are built directly at 1e-4 and 1e-5.
+
+Two families, answering two different questions, kept in separate
+subfolders:
+
+**`same_geometry/`** — reuses an existing instance's own zone geometry,
+obstacles, and turbine count verbatim (178 → 23 turbines, 101 → 63
+turbines), only resampling the available-positions grid denser. Holes/
+structures are generated once per source instance and held fixed across
+that instance's ratio variants, so ratio is the only thing that changes
+within a family — the cleanest control for "does ratio alone cause the
+degeneracy," and directly comparable to the already-published
+`STNs-MOCO-MoWFLOP/sharing/rq1_entropy/entropy_curve_ns178_*`/`ns101_*`
+curves at their native (non-sparse) ratio.
+
+| Instance   | Source | Turbines | Available positions | Ratio    |
+|------------|--------|----------|----------------------|----------|
+| 178_r1e-04 | 178    | 23       | 227722               | 1.010e-4 |
+| 178_r1e-05 | 178    | 23       | 2277665              | 1.010e-5 |
+| 101_r1e-04 | 101    | 63       | 624152               | 1.009e-4 |
+| 101_r1e-05 | 101    | 63       | 6242315              | 1.009e-5 |
+
+**`fresh_geometry/`** — brand-new random single-zone sites (same generator
+pipeline as `script.py`: random polygon, holes/structures, fixed turbines),
+independent of 178/101, with only the total turbine count fixed to match
+(23 or 63) so it's comparable at the same ratio. Tests whether the
+degeneracy is a general property of the ratio (as §5.3 claims) or an
+artifact specific to instances 178/101's particular geometry — paired
+against the matching `same_geometry` instance at the same (turbine count,
+ratio).
+
+| Instance  | Turbines | Available positions | Ratio    |
+|-----------|----------|----------------------|----------|
+| 23t_r1e-04| 23       | 227770               | 1.010e-4 |
+| 23t_r1e-05| 23       | 2278508              | 1.009e-5 |
+| 63t_r1e-04| 63       | 624070               | 1.010e-4 |
+| 63t_r1e-05| 63       | 6241368              | 1.009e-5 |
+
+Each folder has the same file set as a normal instance
+(`availablePositions.txt`, `fixed_wf.txt`, `turbines_per_zone.txt`,
+`geometry.txt`, `plot.png`). These are **not yet** symlinked into
+`../instances/site/` or listed in `WFLOP instances.xlsx` — both are
+deliberately deferred pending a decision on how to run/document them.
+
+Generated with `instancegeneration/instance_generation/gen_sparse_variant.py`
+(sibling repo, top-level `TCC/instancegeneration/`) — `same` mode ports
+`gen_holes`/`gen_structures`/etc. from `script.py` to apply obstacles once
+per source family (`script.py` itself can't be imported directly, it has
+top-level side-effecting code); `fresh` mode reuses `gen_layout.py`'s site
+generation directly. Both binary-search the available-positions grid
+resolution (vectorized `shapely.contains_xy`, scales to millions of points)
+to hit the requested ratio within ~1%.
+
 ## Wind scenarios
 Wind data are taken from RVO website (Netherlands ministry) as of July 2020: https://offshorewind.rvo.nl/
 In the folder ```wind/```, 5 files provide wind scenarios, for the sites Hollandse Kust (Noord) ```RVO_HKN.txt```, Hollandse Kust (West) ```RVO_HKW.txt```, Hollandse Kust (Zuid) ```RVO_HKZ.txt```, IJmuiden Ver ```RVO_IJV.txt```, and Ten Noorden van de Waddeneilanden ```RVO_TNW.txt```.

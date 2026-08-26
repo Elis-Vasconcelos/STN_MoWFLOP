@@ -289,12 +289,13 @@ run the P values **concurrently**, not sequentially:
 ./meta_heuristics/scripts/batch.sh instances_stn10.txt "moead nsga2" 10 1000000 30 10 100 50
 ```
 Each P lands in its own output directory/log — nothing gets skipped or
-overwritten between them. This needs enough free cores to run all of it
-at once (10 instances × 2 algorithms × 3 P values = 60 concurrent
-single-threaded processes) — check availability first (`nproc`, `uptime`,
-`top`) if the machine is shared. Fewer P values per invocation, or waiting
-for one to finish before the next, trades wall-clock time for a smaller
-concurrent footprint.
+overwritten between them. `batch.sh` launches one process **per
+instance** (each running its `{algos} × num_runs` combinations
+sequentially inside), so 3 P sweeps means 10 instances × 3 P values = 30
+concurrent single-threaded processes, each using one core — check
+availability first (`nproc`, `uptime`, `top`) if the machine is shared.
+Fewer P values per invocation, or waiting for one to finish before the
+next, trades wall-clock time for a smaller concurrent footprint.
 
 **Provenance**: `run_instance.sh`/`batch.sh` adapt Gustavo/João's
 `MO_WFLOP-experiment-runner` two-file split (`scripts/main.sh` +
