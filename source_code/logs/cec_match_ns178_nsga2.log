@@ -1,0 +1,16 @@
+[start] instance=ns178 algo=nsga2 run_id=50 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T21:49:53+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 11.000000000000
+Angle: 120.000000000000
+Run id: 50
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[done]  instance=ns178 algo=nsga2 run_id=50 2026-08-25T22:03:29+00:00

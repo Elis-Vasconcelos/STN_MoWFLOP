@@ -1,0 +1,160 @@
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=0 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T06:39:48+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 0
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=1 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T06:46:41+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 1
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=2 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T07:01:18+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 2
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=3 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T07:24:45+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 3
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=4 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T08:19:16+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 4
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=5 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T08:35:55+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 5
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=6 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T09:03:20+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 6
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=7 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T09:16:43+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 7
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=8 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T09:17:52+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 8
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=nsga2 run_id=9 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T09:47:23+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 9
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+./meta_heuristics/scripts/run_one.sh: line 120: 310535 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
+./meta_heuristics/scripts/run_one.sh: line 120: 310347 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
+./meta_heuristics/scripts/run_one.sh: line 120: 310400 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
+./meta_heuristics/scripts/run_one.sh: line 120: 310468 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
+./meta_heuristics/scripts/run_one.sh: line 120: 310427 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
+./meta_heuristics/scripts/run_one.sh: line 120: 310496 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
+./meta_heuristics/scripts/run_one.sh: line 120: 310360 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
+./meta_heuristics/scripts/run_one.sh: line 120: 310483 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
+./meta_heuristics/scripts/run_one.sh: line 120: 310372 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
+./meta_heuristics/scripts/run_one.sh: line 120: 310444 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"
