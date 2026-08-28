@@ -26,3 +26,13 @@ instances/site/ns*
 # run_one.sh's generic fallback finds these by exact directory name under
 # wflop_instances/ and symlinks them on demand too, same as ns<digits>.
 instances/site/*_r1e-*
+
+# --- Over GitHub's 100 MB hard limit: kept on disk + in the Drive archive, NOT git ---
+# r1e-05 position grids (165-453 MB each; regenerable from the site geometry)
+wflop_instances/sparse_instances/*/r1e-05/*/availablePositions.txt
+# r1e-05 candidate CSVs at 98-272 MB
+raw_results/meta_heuristics_stn_windcorrected/candidates/101_r1e-05_candidates.csv
+raw_results/meta_heuristics_stn_windcorrected/candidates/178_r1e-05_candidates.csv
+# per-run candidate copies are byte-identical dups of candidates/<inst>_candidates.csv
+raw_results/meta_heuristics_stn_windcorrected/moead/*/*/*/*_candidates.csv
+raw_results/meta_heuristics_stn_windcorrected/nsga2/*/*/*/*_candidates.csv
