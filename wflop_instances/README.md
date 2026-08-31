@@ -118,20 +118,62 @@ ratio).
 | 63t_r1e-04| 63       | 624070               | 1.010e-4 |
 | 63t_r1e-05| 63       | 6241368              | 1.009e-5 |
 
+**`single_site_sweep/`** — the current RQ1 arm (advisor's instruction,
+2026-08-31: "pode gerar todas no mesmo sítio, isto é, a mesma geometria").
+Eight instances that **all share one synthetic single-zone site**: the same
+polygon, the same obstacles, the same 58 fixed turbines, and the same
+underlying Perlin depth field (`geometry.txt` and `fixed_wf.txt` are
+byte-identical across all eight). Only two things vary:
+
+* `τ` — 5 mobile turbines for `506`–`509`, 15 for `510`–`513`, and
+* `|P|` — a four-point density sweep from ~10⁻² down to ~10⁻⁵.
+
+So within each `τ` family the sparsity is the *only* variable, and between
+the two families `τ` is the only variable. This isolates the density effect
+on the entropy metric / occupation-grid partitioning / `κ` / algorithm
+behaviour from any change of landscape — the `same_geometry`/`fresh_geometry`
+question (real vs. synthetic, one site vs. several) is left for a later arm.
+
+| Instance | τ  | Available positions | Density (τ/\|P\|) |
+|----------|----|---------------------|------------------|
+| 506_e-02 | 5  | 60                  | 8.33e-2 |
+| 507_e-03 | 5  | 600                 | 8.33e-3 |
+| 508_e-04 | 5  | 6000                | 8.33e-4 |
+| 509_e-05 | 5  | 60000               | 8.33e-5 |
+| 510_e-02 | 15 | 1076                | 1.39e-2 |
+| 511_e-03 | 15 | 2548                | 5.89e-3 |
+| 512_e-04 | 15 | 19505               | 7.69e-4 |
+| 513_e-05 | 15 | 185054              | 8.11e-5 |
+
+The `|P|` values are fixed by `TCC/WFLOP instances - Instâncias esparsas.csv`
+and reproduced **exactly** (not to within ~1% like the ratio families): the
+grid cell size is bracketed so the in-polygon count lands at or just above
+target, then the surplus points are dropped uniformly at random (fixed seed)
+to hit the exact integer — random drop keeps the grid uniform without
+pulling the candidate region's outline inward, so the site stays identical
+across the eight.
+
 Each folder has the same file set as a normal instance
 (`availablePositions.txt`, `fixed_wf.txt`, `turbines_per_zone.txt`,
-`geometry.txt`, `plot.png`). These are **not yet** symlinked into
-`../instances/site/` or listed in `WFLOP instances.xlsx` — both are
-deliberately deferred pending a decision on how to run/document them.
+`geometry.txt`, `plot.png`). None of the three families are listed in
+`WFLOP instances.xlsx` (deferred); they are symlinked into
+`../instances/site/` on demand by `run_one*.sh` (generic name-match
+fallback), matched by the `.gitignore` rules `instances/site/*_r1e-*` and
+`instances/site/*_e-0*`.
 
-Generated with `instancegeneration/instance_generation/gen_sparse_variant.py`
-(sibling repo, top-level `TCC/instancegeneration/`) — `same` mode ports
+The two ratio families were generated with
+`instancegeneration/instance_generation/gen_sparse_variant.py` (sibling repo,
+top-level `TCC/instancegeneration/`) — `same` mode ports
 `gen_holes`/`gen_structures`/etc. from `script.py` to apply obstacles once
 per source family (`script.py` itself can't be imported directly, it has
 top-level side-effecting code); `fresh` mode reuses `gen_layout.py`'s site
 generation directly. Both binary-search the available-positions grid
 resolution (vectorized `shapely.contains_xy`, scales to millions of points)
-to hit the requested ratio within ~1%.
+to hit the requested ratio within ~1%. `single_site_sweep/` was generated
+with `instances/instance_generator/gen_single_site_sweep.py` **in this repo**
+(same `gen_layout.py` + ported obstacle helpers), which additionally forces
+an exact `|P|` and an exact 58-turbine fixed grid, and samples one shared
+depth field over the site bounds.
 
 ## Wind scenarios
 Wind data are taken from RVO website (Netherlands ministry) as of July 2020: https://offshorewind.rvo.nl/

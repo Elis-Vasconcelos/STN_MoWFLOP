@@ -26,6 +26,9 @@ instances/site/ns*
 # run_one.sh's generic fallback finds these by exact directory name under
 # wflop_instances/ and symlinks them on demand too, same as ns<digits>.
 instances/site/*_r1e-*
+# single-site sparsity sweep (506_e-02 .. 513_e-05, wflop_instances/
+# sparse_instances/single_site_sweep/) -- same on-demand symlink story
+instances/site/*_e-0*
 
 # --- Over GitHub's 100 MB hard limit: kept on disk + in the Drive archive, NOT git ---
 # r1e-05 position grids (165-453 MB each; regenerable from the site geometry)
