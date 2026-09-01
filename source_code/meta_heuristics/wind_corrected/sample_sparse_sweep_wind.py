@@ -13,14 +13,25 @@ gerado e o REGISTRO PERMANENTE: nao e pra ser regenerado depois (cada
 regeracao produz sorteios diferentes). Versione o CSV, nao confie em
 reproduzir a partir deste script.
 
-Uso: python3 sample_sparse_sweep_wind.py > sparse_wind_map_506-513.csv
+Uso:
+  # gera o mapa inteiro do zero (run_id 0..N_RUNS-1), com header:
+  python3 sample_sparse_sweep_wind.py > sparse_wind_map_506-513.csv
+
+  # so as linhas NOVAS a partir de um run_id (sem header), pra estender um
+  # mapa que ja existe sem tocar nas linhas antigas:
+  python3 sample_sparse_sweep_wind.py --append-from 20 >> sparse_wind_map_506-513.csv
+
+O modo --append-from foi usado em 2026-09-01 pra ir de 20 -> 30 execucoes por
+(instancia, algo) depois que o Prof. Islame pediu 30 (10 pra plotar as STN +
+20 pro conjunto de referencia do pareto). As linhas 0..19 ja estavam rodando
+no Bambu e ficaram intactas.
 """
 import csv
 import random
 import sys
 
 WIND_FILE = "/home/elis/Projects/TCC/STN_MoWFLOP/wflop_instances/wind/RVO_TNW.txt"
-N_RUNS = 20
+N_RUNS = 30
 ALGOS = ["moead", "nsga2"]
 INSTANCES = [
     "506_e-02", "507_e-03", "508_e-04", "509_e-05",
@@ -53,15 +64,26 @@ def sample_one(rows, rng):
 
 
 def main():
+    start_run = 0
+    emit_header = True
+    if len(sys.argv) == 3 and sys.argv[1] == "--append-from":
+        start_run = int(sys.argv[2])
+        emit_header = False
+        if not 0 <= start_run < N_RUNS:
+            sys.exit(f"--append-from {start_run} fora de [0, {N_RUNS})")
+    elif len(sys.argv) > 1:
+        sys.exit(__doc__)
+
     rows = load_wind_rose(WIND_FILE)
     rng = random.SystemRandom()  # entropia real, sem seed fixa
 
     writer = csv.writer(sys.stdout, lineterminator="\n")
-    writer.writerow(["instance", "algo", "run_id", "angle", "wind", "source"])
+    if emit_header:
+        writer.writerow(["instance", "algo", "run_id", "angle", "wind", "source"])
 
     for instance in INSTANCES:
         for algo in ALGOS:
-            for run_id in range(N_RUNS):
+            for run_id in range(start_run, N_RUNS):
                 angle, wind = sample_one(rows, rng)
                 writer.writerow([
                     instance, algo, run_id,

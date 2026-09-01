@@ -16,14 +16,15 @@ reais no bambu1, não estimativas.
 
 | | |
 |---|---|
-| Lançada em | **2026-09-01 ~13:57 UTC** (bambu1, usuário `elis`) |
+| 1º lançamento (20 runs) | **2026-09-01 ~13:57 UTC** (bambu1, usuário `elis`) |
+| Ampliação p/ 30 runs | **2026-09-01** — Prof. Islame pediu 30 execuções por (instância, algo), não 20 (ver §0). `run_id` 20–29 adicionados ao wind map; relançar o `podman run` preenche só os que faltam (idempotente). |
 | Container | `campanha` (`podman ps` / `podman logs campanha`) |
 | Persistência | `loginctl enable-linger elis` habilitado → sobrevive a logout |
-| Total de runs | **320** (8 instâncias × 2 algos × 20) |
-| Fim esperado | ~8–12 h depois do lançamento (cauda = nsga2 em `509_e-05`/`513_e-05`) |
+| Total de runs | **480** (8 instâncias × 2 algos × 30) |
+| Fim esperado | ~12–18 h a partir do relançamento com 30 runs (cauda = nsga2 em `509_e-05`/`513_e-05`) |
 | Retomada | idempotente — basta relançar o mesmo `podman run` (§6); runs com `_stn.csv` não-vazio são puladas |
 
-Quando `find ... -name '*_stn.csv' -size +0c | wc -l` bater **320** e o grep
+Quando `find ... -name '*_stn.csv' -size +0c | wc -l` bater **480** e o grep
 de erro (§7) não achar nada → empacotar e trazer de volta (§8).
 
 ---
@@ -34,18 +35,43 @@ de erro (§7) não achar nada → empacotar e trazer de volta (§8).
 |---|---|
 | Instâncias | `506_e-02 507_e-03 508_e-04 509_e-05 510_e-02 511_e-03 512_e-04 513_e-05` |
 | Algoritmos | `moead`, `nsga2` |
-| Execuções por (instância, algo) | **20** (`run_id` 0–19) |
+| Execuções por (instância, algo) | **30** (`run_id` 0–29) |
 | `stop_criteria` | **1 000 000** avaliações |
 | STN `stn_p` (nº de vetores observadores) | **100** |
 | STN `stn_interval` (generations entre amostras) | **50** |
 | `(angle, wind)` | pré-sorteado, uma tupla por (instância, algo, run_id) — `sparse_wind_map_506-513.csv` |
-| Total de combinações | 8 × 2 × 20 = **320** |
+| Total de combinações | 8 × 2 × 30 = **480** |
 | Servidor | **bambu1** — `bambu-server1.freeddns.org`, SSH porta **4522**, auth por senha |
 | Saída | `raw_results/meta_heuristics_stn_windcorrected/<algo>/<instance>/p100_i50/<run_id>/` |
 
+### Por que 30 execuções (10 + 20)
+
+Instrução do Prof. Islame (2026-09-01): **30 = 10 + 20**, servindo a dois
+propósitos distintos:
+
+- **10 runs → plotar as STN.** É o número fixo do protocolo da tese
+  (`STN_MoWFLOP.pdf` §10.2/§10.5, "10 runs", *"Não altere"*) e da
+  metodologia STNs-MOCO da Ochoa. A STN funde as trajetórias dessas runs
+  num único grafo por algoritmo — com muitas runs vira um emaranhado
+  ilegível. Então a visualização fica em 10.
+- **20 runs → conjunto de referência do Pareto.** Pra calcular indicadores
+  de qualidade (hypervolume, IGD, ε) é preciso uma aproximação da frente
+  de Pareto verdadeira. As famílias `ns178`/`ns101` podem reusar a frente
+  de referência **publicada** do CEC2026; as `506–513` são sítios
+  sintéticos novos, **sem frente de referência externa** — a nossa tem que
+  ser construída juntando as soluções não-dominadas de muitas runs dos
+  dois algoritmos. 20 é o número que casa com o protocolo do próprio
+  CEC2026.
+
+Como todas as 30 rodam com **config idêntica** (STN logging ligado —
+instrumentação externa, não afeta a busca), na prática não há diferença de
+execução. A divisão 10/20 é só uma partição em tempo de análise (p.ex.
+`run_id` 0–9 → STN, 10–29 → frente de referência), decidida depois no
+`STNs-MOCO-MoWFLOP/`.
+
 `stn_p=100` é **um único valor** (a campanha STN10 original varria 10/50/100;
 esta não — P é instrumentação externa, não afeta a busca, e 100 é o teto já
-usado). Então são 320 combinações, não 960. Se depois quiser um check de
+usado). Então são 480 combinações, não 1440. Se depois quiser um check de
 robustez a P, dá pra rodar P=10 e P=50 **só** nas 6 instâncias baratas
 (506–508, 510–512) a custo quase zero, sem repetir 509/513.
 
@@ -60,8 +86,23 @@ CEC2026 pra reusar. Gerado **sem seed fixa** (`random.SystemRandom`), então
 regenerar depois (cada regeração dá sorteios diferentes). Já está no bundle;
 versione junto com os resultados.
 
+**Ampliação 20 → 30 (2026-09-01):** as linhas `run_id` 0–19 (as 320
+originais, que já estavam rodando no Bambu) ficaram **intactas, byte a
+byte**; só foram acrescentadas 160 linhas novas (`run_id` 20–29, 10 por
+instância/algo) pelo mesmo método, com:
+
+```bash
+cd source_code/meta_heuristics/wind_corrected
+python3 sample_sparse_sweep_wind.py --append-from 20 >> sparse_wind_map_506-513.csv
+# 321 linhas (1 header + 320)  ->  481 linhas (1 header + 480)
+```
+
+O arquivo fica agrupado 0–19 e depois 20–29 — inofensivo: o launcher lê
+`(angle, wind)` direto de cada linha (§5/§6), não faz lookup por linha/chave.
+
 Gerador: `source_code/meta_heuristics/wind_corrected/sample_sparse_sweep_wind.py`
-(só pra rastreabilidade do método — **não rode de novo**).
+(rastreabilidade do método + o modo `--append-from` usado acima — **não rode
+sem argumento**, isso geraria um mapa 0–29 todo novo).
 
 ---
 
@@ -82,7 +123,7 @@ comentado em `instance_info.cpp`; o `(angle, wind)` já vem pronto do wind map).
 ```bash
 cd /home/elis/Projects/TCC/STN_MoWFLOP
 
-# garante que o wind map está gerado (321 linhas: 1 header + 320)
+# garante que o wind map está gerado (481 linhas: 1 header + 480)
 wc -l source_code/meta_heuristics/wind_corrected/sparse_wind_map_506-513.csv
 
 tar czf /tmp/sparse_campaign_bundle.tar.gz \
@@ -124,7 +165,7 @@ mkdir -p instances/site raw_results source_code/logs
 # confere (as 8 pastas de instância ficam em profundidade 4)
 ls wflop_instances/sparse_instances/single_site_sweep/     # 506_e-02 ... 513_e-05
 ls instances/wtg/                                          # NREL-10-179.txt  NREL-15-240.txt
-wc -l < source_code/meta_heuristics/wind_corrected/sparse_wind_map_506-513.csv   # 321
+wc -l < source_code/meta_heuristics/wind_corrected/sparse_wind_map_506-513.csv   # 481
 ```
 
 `run_one_windcorrected.sh` acha cada instância com
@@ -248,13 +289,22 @@ Escala ~linear → por run completo de 1e6 evals:
 | 513_e-05 | 185 054 | ~15–25 min | **~7–8 h** |
 
 NSGA-II é o gargalo (non-dominated sorting + crowding sobre um espaço de
-185k posições por geração). Custo agregado ≈ **260–300 CPU-h**; wall-clock
-**~8–12 h** com `-P 55` (o piso é uma run nsga2 de `513_e-05` ≈ 8 h).
-Bem abaixo do 1–3 dias que a estimativa a priori supunha.
+185k posições por geração). Tabela acima é por instância/algoritmo,
+independente de quantas runs — pra **30** runs (em vez de 20) o custo
+agregado escala ≈ 1,5×: **~390–450 CPU-h**; wall-clock esperado **~12–18 h**
+com `-P 55` (o piso continua sendo uma run nsga2 de `513_e-05` ≈ 8 h, só que
+agora são 30 dessas na fila em vez de 20). Ainda bem abaixo do 1–3 dias que
+a estimativa a priori supunha.
+
+Medição real do 1º lançamento (20 runs): 506–509 (τ=5) terminaram em ~20 min
+— **bem mais rápido** que a extrapolação acima previa. Ao ampliar pra 30,
+confirme um run pesado (`509`/`513` nsga2, `run_id` ≥ 20) de fato bateu 1e6
+avaliações (tem `*_1000000.txt`, generation alta em `infoRun.txt`) em vez de
+assumir pela contagem de arquivos.
 
 ---
 
-## 5. Gerar a lista de 320 combinações
+## 5. Gerar a lista de 480 combinações
 
 Colocada em `source_code/` (dentro do bind mount do container), **não** em
 `/tmp` (que o container não monta):
@@ -264,10 +314,14 @@ cd ~/STN_MoWFLOP/source_code
 WMAP=meta_heuristics/wind_corrected/sparse_wind_map_506-513.csv
 
 tail -n +2 "$WMAP" | awk -F',' '{print $1, $2, $3, $4, $5}' > sparse_combos.txt
-wc -l sparse_combos.txt        # espera 320
+wc -l sparse_combos.txt        # espera 480
 head -3 sparse_combos.txt      # ex: 506_e-02 moead 0 210.000000000000 11.000000000000
-tail -1 sparse_combos.txt      # 513_e-05 nsga2 19 ...
+grep -c ' 2[0-9] ' sparse_combos.txt  # espera 160 (run_id 20-29, os novos)
 ```
+
+Relançar esta lista contra um `~/STN_MoWFLOP` que já tem os `run_id` 0–19
+prontos é seguro: `run_one_windcorrected.sh` pula (`[skip]`) tudo que já tem
+`_stn.csv` não-vazio (§6) — só `run_id` 20–29 de fato executam.
 
 Cada linha vira 5 campos: `<instance> <algo> <run_id> <angle> <wind>`.
 `stop_criteria`, `stn_p`, `stn_interval` (1000000 / 100 / 50) são fixos e
@@ -318,10 +372,10 @@ cd ~/STN_MoWFLOP
 # container vivo?
 podman ps                                # 'campanha' deve estar Up
 
-# combinações completas — espera 320 no fim
+# combinações completas — espera 480 no fim
 find raw_results/meta_heuristics_stn_windcorrected -name '*_stn.csv' -size +0c | wc -l
 
-# por instância/algo — espera 20 cada (16 linhas no total)
+# por instância/algo — espera 30 cada (16 linhas no total)
 find raw_results/meta_heuristics_stn_windcorrected -name '*_stn.csv' -size +0c \
   | sed -E 's#.*/(moead|nsga2)/([0-9]+_e-0[0-9])/.*#\1 \2#' | sort | uniq -c
 
@@ -337,7 +391,7 @@ tail -1 raw_results/meta_heuristics_stn_windcorrected/nsga2/513_e-05/p100_i50/7/
 
 O contador vai parecer travar: 506/507/510/511 terminam em segundos, aí
 508→512→509→513 seguram cada núcleo por minutos/horas. Esperar o contador
-ficar em ~250–260 por boa parte de um dia enquanto a cauda 509/513 nsga2
+ficar em ~370–390 por boa parte de um dia enquanto a cauda 509/513 nsga2
 termina é normal.
 
 Cada `<run_id>/` completo tem: `infoRun.txt`, `*_stn.csv`, `*_<n>.txt`
@@ -348,7 +402,7 @@ Cada `<run_id>/` completo tem: `infoRun.txt`, `*_stn.csv`, `*_<n>.txt`
 
 ## 8. Trazer os resultados de volta
 
-Quando `... | wc -l` bater **320** e o grep de erro não achar nada:
+Quando `... | wc -l` bater **480** e o grep de erro não achar nada:
 
 ```bash
 cd ~/STN_MoWFLOP
