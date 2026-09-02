@@ -39,3 +39,17 @@ raw_results/meta_heuristics_stn_windcorrected/candidates/178_r1e-05_candidates.c
 # per-run candidate copies are byte-identical dups of candidates/<inst>_candidates.csv
 raw_results/meta_heuristics_stn_windcorrected/moead/*/*/*/*_candidates.csv
 raw_results/meta_heuristics_stn_windcorrected/nsga2/*/*/*/*_candidates.csv
+
+# --- Thesis STN campaign raw OUTPUT: kept on disk + Drive archive, NOT git ---
+# (2026-09-02) These two dirs are the thesis's own STN trajectory output, not
+# input. meta_heuristics_stn_windcorrected/ is *already* committed in
+# STNs-MOCO-MoWFLOP as the R pipeline's input, so committing it here too was
+# ~11 GB of duplicate history and the main cause of slow git / VS Code.
+# The original paper's raw_results/{meta_features,meta_heuristics,stat_analysis}
+# stay tracked -- those are that paper's published replication artifact.
+# git is still the transfer path for instance/code INPUT to the servers;
+# results come back via tar and live in the Drive archive.
+# (History still carries these two dirs on the feature branches; a later
+# filter-repo can reclaim that space -- see PLANO_ORGANIZACAO_REPOS.md.)
+raw_results/meta_heuristics_stn/
+raw_results/meta_heuristics_stn_windcorrected/
