@@ -422,8 +422,16 @@ ls -lh ~/sparse_campaign_results.tar.gz
 # na sua máquina local
 scp -P 4522 <user>@bambu-server1.freeddns.org:~/sparse_campaign_results.tar.gz .
 
-cd /home/elis/Projects/TCC/STN_MoWFLOP
-tar xzf ~/sparse_campaign_results.tar.gz   # cai em raw_results/meta_heuristics_stn_windcorrected/
+# os dados STN vão pro STNs-MOCO — é o repo canônico de raw_results daqui pra
+# frente (decisão com o Arthur, 2026-09-02). STN_MoWFLOP não versiona mais
+# output STN da campanha.
+tar xzf ~/sparse_campaign_results.tar.gz -C /home/elis/Projects/TCC/STNs-MOCO-MoWFLOP/ \
+  raw_results/meta_heuristics_stn_windcorrected
+
+# o log do launcher fica no STN_MoWFLOP (lado de código/campanha); o
+# sparse_wind_map_506-513.csv já está versionado lá, não precisa extrair
+tar xzf ~/sparse_campaign_results.tar.gz -C /home/elis/Projects/TCC/STN_MoWFLOP/ \
+  source_code/logs/sparse_campaign_launcher.log
 ```
 
 **Storage do Bambu não tem backup** e a cota é 320/322 GB — baixe os
