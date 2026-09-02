@@ -3,7 +3,7 @@
 # (instância, algoritmo), pra reusar nos nossos runs corrigidos.
 set -euo pipefail
 CEC_ROOT="/home/elis/Projects/TCC/external_pf/wflopcec26/algorithms_raw_results"
-OUT="/home/elis/Projects/TCC/STN_MoWFLOP/tmp_demo/wind_corrected/cec_wind_map.csv"
+OUT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/cec_wind_map.csv"
 echo "instance,algo,run_id,angle,wind" > "$OUT"
 
 instances="41 48 101 178 192 202 203 440 465 488"

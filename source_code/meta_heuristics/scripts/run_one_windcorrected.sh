@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Variante de run_one.sh pra campanha STN10 corrigida (vento/ângulo real do
 # CEC por execução, em vez do angle=30/wind=10 fixo original -- ver
-# STN_MoWFLOP/tmp_demo/wind_corrected/PLANO_CAMPANHA_CORRIGIDA.md).
+# STN_MoWFLOP/source_code/meta_heuristics/wind_corrected/PLANO_CAMPANHA_CORRIGIDA.md).
 #
 # ÚNICA diferença em relação a run_one.sh: escreve em
 # raw_results/meta_heuristics_stn_windcorrected/ em vez de

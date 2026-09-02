@@ -40,7 +40,7 @@ nova. É exatamente o mesmo método que já validamos pra `ns101`/`ns178`.
 
 ## 3. O que já foi gerado (local, read-only)
 
-`STN_MoWFLOP/tmp_demo/wind_corrected/extract_cec_wind.sh` — lê
+`STN_MoWFLOP/source_code/meta_heuristics/wind_corrected/extract_cec_wind.sh` — lê
 `external_pf/wflopcec26/algorithms_raw_results/{MOEAD,NSGA2}/<inst>/
 <1..10>/log.txt` pras 10 instâncias, extrai `Wind:`/`Angle:` de cada uma,
 mapeia run CEC 1→`run_id=0`, ..., run CEC 10→`run_id=9`. Saída:
@@ -126,7 +126,7 @@ sempre.
 
 ```bash
 # 1. transferir cec_wind_map.csv e o script novo pro supercomputador
-scp -P 2004 tmp_demo/wind_corrected/cec_wind_map.csv \
+scp -P 2004 source_code/meta_heuristics/wind_corrected/cec_wind_map.csv \
   gpu@200.128.51.124:~/STN_MoWFLOP/source_code/
 scp -P 2004 source_code/meta_heuristics/scripts/run_one_windcorrected.sh \
   gpu@200.128.51.124:~/STN_MoWFLOP/source_code/meta_heuristics/scripts/
