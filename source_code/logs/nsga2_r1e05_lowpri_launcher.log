@@ -1,0 +1,31 @@
+algo deve ser 'moead' ou 'nsga2', recebido: 
+[start] instance=178_r1e-05 algo=nsga2 run_id=0 angle=120.000000000000 wind=11.000000000000 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-26T18:14:39+00:00
+[start] instance=178_r1e-05 algo=nsga2 run_id=1 angle=240.000000000000 wind=7.000000000000 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-26T18:14:40+00:00
+9
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 7.000000000000
+Angle: 240.000000000000
+Run id: 1
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 11.000000000000
+Angle: 120.000000000000
+Run id: 0
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:

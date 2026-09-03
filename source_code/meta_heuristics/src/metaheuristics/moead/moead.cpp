@@ -19,6 +19,9 @@
 #include "../../../headers/global_modules/dominates.h"
 #include "../../../headers/global_modules/isEqual.h"
 
+#include "../../../headers/globals.h"
+#include "../../../headers/utils/stn_logger.h"
+
 #include "../../../headers/metaheuristics/moead/moead.h"
 
 using namespace std;
@@ -45,13 +48,23 @@ void moead(vector<Solution>& population){
     tch_vector[i] = calculate_gte(population[i].fitness, lambda_vector[i], z_point);
   }
   
+  // p vetores próprios da STN, um conjunto separado e menor dos
+  // size_population vetores internos da decomposição do MOEA/D acima --
+  // por isso, mesmo aqui, a representativa de cada vetor da STN precisa
+  // ser escolhida, não sai direto de population[j]
+  vector<pair<double, double>> stn_lambda_vector = build_weight_vector(STN_LOGGER_NUM_VECTORS);
+
   int generation = 0;
 
   ofstream infoRun(root_folder + "infoRun.txt");
 
+  STNLogger stn(root_folder + instance + "_" + algorithm, stn_lambda_vector);
+
   while (countRevalue < stop_criteria) {
 
     infoRun << "Generation " << generation << " | Revalues: " << countRevalue << " | GridSize: " << pareto->getSize() << endl;
+
+    stn.log(generation, select_representatives(population, stn_lambda_vector, z_point));
 
     for (int i = 0; i < size_population; i++) {
 

@@ -1,0 +1,145 @@
+[skip] ../raw_results/meta_heuristics_stn/moead/178_r1e-04/p10_i50/0/178_r1e-04_moead_stn.csv já existe, run considerada completa
+[start] instance=178_r1e-04 algo=moead run_id=1 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:27:29+00:00
+[start] instance=178_r1e-04 algo=moead run_id=3 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:27:29+00:00
+[start] instance=178_r1e-04 algo=moead run_id=2 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:27:29+00:00
+[start] instance=178_r1e-04 algo=moead run_id=4 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:27:29+00:00
+[start] instance=178_r1e-04 algo=moead run_id=5 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:27:29+00:00
+9
+9
+9
+[start] instance=178_r1e-04 algo=moead run_id=6 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:27:29+00:00
+[start] instance=178_r1e-04 algo=moead run_id=7 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:27:29+00:00
+[start] instance=178_r1e-04 algo=moead run_id=8 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:27:29+00:00
+9
+[start] instance=178_r1e-04 algo=moead run_id=9 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:27:29+00:00
+9
+9
+9
+9
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 4
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 2
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+
+
+Number of subproblems: 100
+Number of subproblems: 100
+Number of subproblems: 100
+Number of neighbors: 10
+Number of neighbors: 10
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of fixed turbines: 58
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Number of mobile turbines: 23
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Wind: 10.000000000000
+Run id: 9
+Stop criteria: 1000000
+Wind: 10.000000000000
+Angle: 30.000000000000
+STN P (num vectors): 10
+Angle: 30.000000000000
+Run id: 6
+STN logger interval: 50
+Run id: 7
+Stop criteria: 1000000
+
+Stop criteria: 1000000
+STN P (num vectors): 10
+Run time:
+STN P (num vectors): 10
+STN logger interval: 50
+STN logger interval: 50
+
+
+Run time:
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 1
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 8
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of subproblems: 100
+Number of fixed turbines: 58
+Number of neighbors: 10
+Number of mobile turbines: 23
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Wind: 10.000000000000
+Angle: 30.000000000000
+Angle: 30.000000000000
+Run id: 3
+Run id: 5
+Stop criteria: 1000000
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN P (num vectors): 10
+STN logger interval: 50
+STN logger interval: 50
+
+
+Run time:
+Run time:
+[done]  instance=178_r1e-04 algo=moead run_id=1 2026-08-25T02:11:13+00:00
+[done]  instance=178_r1e-04 algo=moead run_id=3 2026-08-25T02:11:34+00:00
+[done]  instance=178_r1e-04 algo=moead run_id=2 2026-08-25T02:15:19+00:00
+[done]  instance=178_r1e-04 algo=moead run_id=5 2026-08-25T02:16:00+00:00
+[done]  instance=178_r1e-04 algo=moead run_id=7 2026-08-25T02:18:35+00:00
+[done]  instance=178_r1e-04 algo=moead run_id=6 2026-08-25T02:22:24+00:00
+[done]  instance=178_r1e-04 algo=moead run_id=8 2026-08-25T02:22:53+00:00
+[done]  instance=178_r1e-04 algo=moead run_id=4 2026-08-25T02:23:04+00:00
+[done]  instance=178_r1e-04 algo=moead run_id=9 2026-08-25T02:29:32+00:00

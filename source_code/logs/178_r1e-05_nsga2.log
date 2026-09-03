@@ -1,0 +1,137 @@
+[skip] ../raw_results/meta_heuristics_stn/nsga2/178_r1e-05/p10_i50/0/178_r1e-05_nsga2_stn.csv já existe, run considerada completa
+[start] instance=178_r1e-05 algo=nsga2 run_id=1 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:29:57+00:00
+9
+[start] instance=178_r1e-05 algo=nsga2 run_id=2 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:29:57+00:00
+[start] instance=178_r1e-05 algo=nsga2 run_id=3 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:29:57+00:00
+[start] instance=178_r1e-05 algo=nsga2 run_id=5 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:29:57+00:00
+9
+9
+9
+[start] instance=178_r1e-05 algo=nsga2 run_id=4 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:29:57+00:00
+[start] instance=178_r1e-05 algo=nsga2 run_id=6 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:29:57+00:00
+[start] instance=178_r1e-05 algo=nsga2 run_id=7 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:29:57+00:00
+9
+9
+[start] instance=178_r1e-05 algo=nsga2 run_id=8 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:29:57+00:00
+[start] instance=178_r1e-05 algo=nsga2 run_id=9 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T00:29:57+00:00
+9
+9
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 5
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 1
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 9
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 7
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 3
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 8
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 2
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 4
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 58
+Number of mobile turbines: 23
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 6
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+./meta_heuristics/scripts/run_one.sh: line 120: 294616 Killed                  ./meta_heuristics/"$algo" "$instance" "$out_dir" "$angle" "$wind" "$run_id" "$stop_criteria" "$stn_p" "$stn_interval"

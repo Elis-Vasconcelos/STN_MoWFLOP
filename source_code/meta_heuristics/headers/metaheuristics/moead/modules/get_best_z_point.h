@@ -7,5 +7,6 @@
 using namespace std;
 
 pair<double, double> get_best_z_point(vector<Solution>& population);
+pair<double, double> get_best_z_point(vector<Solution*>& population);
 
 #endif 

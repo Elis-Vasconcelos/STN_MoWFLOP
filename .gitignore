@@ -1,0 +1,49 @@
+# Compiled binaries (make/make rebuild in source_code/meta_heuristics)
+source_code/meta_heuristics/moead
+source_code/meta_heuristics/nsga2
+
+# wflop_instances/ (Cazzaro/Pisinger "New Sites" real-world instance set,
+# ~700MB, 501 instances) is intentionally NOT ignored -- committed in
+# full, since git is the transfer path to the supercomputer, and
+# hand-picking a subset now would just mean repeating this dance again
+# whenever more of these 500+ instances are needed later.
+#
+# instances/site/ns<id> are symlinks into it, created on demand by
+# run_one.sh the first time a given instance is actually used -- not
+# committed themselves (they're machine-specific relative symlinks,
+# regenerated automatically wherever wflop_instances/ exists).
+instances/site/ns*
+
+# Same idea for any instance that doesn't match the ns<digits> pattern
+# (e.g. the Shannon-entropy sparsity-sweep instances under
+# wflop_instances/sparse_instances/ -- see wflop_instances/README.md) --
+# run_one.sh's generic fallback finds these by exact directory name under
+# wflop_instances/ and symlinks them on demand too, same as ns<digits>.
+instances/site/*_r1e-*
+# single-site sparsity sweep (506_e-02 .. 513_e-05, wflop_instances/
+# sparse_instances/single_site_sweep/) -- same on-demand symlink story
+instances/site/*_e-0*
+
+# --- Over GitHub's 100 MB hard limit: kept on disk + in the Drive archive, NOT git ---
+# r1e-05 position grids (165-453 MB each; regenerable from the site geometry)
+wflop_instances/sparse_instances/*/r1e-05/*/availablePositions.txt
+# r1e-05 candidate CSVs at 98-272 MB
+raw_results/meta_heuristics_stn_windcorrected/candidates/101_r1e-05_candidates.csv
+raw_results/meta_heuristics_stn_windcorrected/candidates/178_r1e-05_candidates.csv
+# per-run candidate copies are byte-identical dups of candidates/<inst>_candidates.csv
+raw_results/meta_heuristics_stn_windcorrected/moead/*/*/*/*_candidates.csv
+raw_results/meta_heuristics_stn_windcorrected/nsga2/*/*/*/*_candidates.csv
+
+# --- Thesis STN campaign raw OUTPUT: kept on disk + Drive archive, NOT git ---
+# (2026-09-02) These two dirs are the thesis's own STN trajectory output, not
+# input. meta_heuristics_stn_windcorrected/ is *already* committed in
+# STNs-MOCO-MoWFLOP as the R pipeline's input, so committing it here too was
+# ~11 GB of duplicate history and the main cause of slow git / VS Code.
+# The original paper's raw_results/{meta_features,meta_heuristics,stat_analysis}
+# stay tracked -- those are that paper's published replication artifact.
+# git is still the transfer path for instance/code INPUT to the servers;
+# results come back via tar and live in the Drive archive.
+# (History still carries these two dirs on the feature branches; a later
+# filter-repo can reclaim that space -- see PLANO_ORGANIZACAO_REPOS.md.)
+raw_results/meta_heuristics_stn/
+raw_results/meta_heuristics_stn_windcorrected/

@@ -1,0 +1,161 @@
+[setup] criado ../instances/site/63t_01_r1e-04 -> ../../wflop_instances/sparse_instances/fresh_geometry/r1e-04/63t_01_r1e-04
+[start] instance=63t_01_r1e-04 algo=moead run_id=0 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T03:42:31+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 0
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=moead run_id=1 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T04:04:14+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 1
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=moead run_id=2 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T04:23:56+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 2
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[done]  instance=63t_01_r1e-04 algo=moead run_id=0 2026-08-25T05:58:24+00:00
+[start] instance=63t_01_r1e-04 algo=moead run_id=3 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T05:58:24+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 3
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=moead run_id=4 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T06:17:19+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 4
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=moead run_id=5 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T06:24:05+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 5
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=moead run_id=6 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T06:33:20+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 6
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=moead run_id=7 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T06:33:59+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 7
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=moead run_id=8 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T06:34:09+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 8
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[start] instance=63t_01_r1e-04 algo=moead run_id=9 stop_criteria=1000000 stn_p=10 stn_interval=50 2026-08-25T06:35:48+00:00
+9
+
+Number of subproblems: 100
+Number of neighbors: 10
+Number of fixed turbines: 4
+Number of mobile turbines: 63
+Wind: 10.000000000000
+Angle: 30.000000000000
+Run id: 9
+Stop criteria: 1000000
+STN P (num vectors): 10
+STN logger interval: 50
+
+Run time:
+[done]  instance=63t_01_r1e-04 algo=moead run_id=2 2026-08-25T07:24:45+00:00
+[done]  instance=63t_01_r1e-04 algo=moead run_id=3 2026-08-25T08:19:16+00:00
+[done]  instance=63t_01_r1e-04 algo=moead run_id=1 2026-08-25T08:35:55+00:00
+[done]  instance=63t_01_r1e-04 algo=moead run_id=4 2026-08-25T09:03:20+00:00
+[done]  instance=63t_01_r1e-04 algo=moead run_id=8 2026-08-25T09:16:43+00:00
+[done]  instance=63t_01_r1e-04 algo=moead run_id=5 2026-08-25T09:17:52+00:00
+[done]  instance=63t_01_r1e-04 algo=moead run_id=9 2026-08-25T09:47:23+00:00
+[done]  instance=63t_01_r1e-04 algo=moead run_id=6 2026-08-25T09:49:16+00:00
+[done]  instance=63t_01_r1e-04 algo=moead run_id=7 2026-08-25T10:09:30+00:00

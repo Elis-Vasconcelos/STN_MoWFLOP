@@ -20,10 +20,13 @@ vector<Solution> create_initial_population(int size_population) {
       string path = instance + "_" + algorithm + "_" + to_string(countRevalue) + ".txt";
 
       pareto->printAllSolutions(root_folder + path);
+    }
 
-      if(countRevalue >= stop_criteria){
-        pareto->printAllSolutionsLayout(root_folder + instance + "_" + algorithm + "_layout.txt");
-      }
+    // independente do checkpoint de 100000 acima -- caso contrário, um
+    // stop_criteria que não seja múltiplo de 100000 nunca dispara essa
+    // condição e o layout final nunca é escrito
+    if(countRevalue >= stop_criteria){
+      pareto->printAllSolutionsLayout(root_folder + instance + "_" + algorithm + "_layout.txt");
     }
 
     delete sol;
