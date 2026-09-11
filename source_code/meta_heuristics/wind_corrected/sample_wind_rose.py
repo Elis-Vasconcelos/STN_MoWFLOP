@@ -23,6 +23,9 @@ Duas fontes, dependendo da familia da instancia:
   nao existe mais).
 
 Uso: python3 sample_wind_rose.py > sparse_wind_map.csv
+
+Já rodado -- sparse_wind_map.csv gerado por este script vive agora em
+STNs-MOCO-MoWFLOP/raw_results/wind_corrected/, não mais aqui.
 """
 import csv
 import random

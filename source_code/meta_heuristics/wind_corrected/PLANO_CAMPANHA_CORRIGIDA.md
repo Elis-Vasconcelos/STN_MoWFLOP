@@ -1,5 +1,13 @@
 # Plano: campanha STN10 corrigida (vento/ângulo real do CEC), pra revisão antes de rodar
 
+> **Nota (2026-09-11):** campanha já executada. `cec_wind_map.csv` não
+> mora mais neste diretório — foi movido pra
+> `STNs-MOCO-MoWFLOP/raw_results/wind_corrected/`, que é onde a
+> normalização por cenário de vento (`scripts/mowflop/wind.py`) o
+> consome. Este documento fica como registro histórico do desenho
+> experimental e dos comandos usados na época; os caminhos abaixo
+> refletem o layout de então.
+
 Status: **plano, nada foi executado no supercomputador ainda.** Já
 prontos, localmente, read-only: `cec_wind_map.csv` (mapeamento de
 vento/ângulo, 200 combinações únicas) e `run_one_windcorrected.sh`
