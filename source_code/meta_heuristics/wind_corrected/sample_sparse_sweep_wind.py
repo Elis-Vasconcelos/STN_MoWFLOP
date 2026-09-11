@@ -25,6 +25,9 @@ O modo --append-from foi usado em 2026-09-01 pra ir de 20 -> 30 execucoes por
 (instancia, algo) depois que o Prof. Islame pediu 30 (10 pra plotar as STN +
 20 pro conjunto de referencia do pareto). As linhas 0..19 ja estavam rodando
 no Bambu e ficaram intactas.
+
+Já rodado -- sparse_wind_map_506-513.csv gerado por este script vive agora
+em STNs-MOCO-MoWFLOP/raw_results/wind_corrected/, não mais aqui.
 """
 import csv
 import random

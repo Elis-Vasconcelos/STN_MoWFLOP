@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Extrai (angle, wind) exatos que o CEC usou nas runs 1-10 de cada
 # (instância, algoritmo), pra reusar nos nossos runs corrigidos.
+#
+# Já rodado -- cec_wind_map.csv gerado por este script vive agora em
+# STNs-MOCO-MoWFLOP/raw_results/wind_corrected/, não mais aqui.
 set -euo pipefail
 CEC_ROOT="/home/elis/Projects/TCC/external_pf/wflopcec26/algorithms_raw_results"
 OUT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/cec_wind_map.csv"

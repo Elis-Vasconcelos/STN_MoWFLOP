@@ -1,5 +1,12 @@
 # Campanha esparsa 506–513 no servidor Bambu — instruções de execução
 
+> **Nota (2026-09-11):** campanha concluída (480/480). `sparse_wind_map_506-513.csv`
+> não mora mais neste diretório — foi movido pra
+> `STNs-MOCO-MoWFLOP/raw_results/wind_corrected/`, consumido de lá por
+> `scripts/mowflop/wind.py`. Este documento fica como registro histórico
+> de como a campanha foi executada; os caminhos abaixo refletem o layout
+> de então.
+
 **RQ1 / sweep de densidade single-site.** Rodar MOEA/D e NSGA-II nas 8
 instâncias `506_e-02 … 513_e-05` (geometria única compartilhada, só τ e
 densidade τ/|P| variam), com `(angle, wind)` sorteado da rosa dos ventos
