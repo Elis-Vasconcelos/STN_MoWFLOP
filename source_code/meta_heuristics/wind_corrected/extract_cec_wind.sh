@@ -5,17 +5,19 @@
 # Já rodado -- cec_wind_map.csv gerado por este script vive agora em
 # STNs-MOCO-MoWFLOP/raw_results/wind_corrected/, não mais aqui.
 set -euo pipefail
-CEC_ROOT="/home/elis/Projects/TCC/external_pf/wflopcec26/algorithms_raw_results"
-OUT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/cec_wind_map.csv"
+# Caminhos relativos a este script: <STN_MoWFLOP>/source_code/meta_heuristics/wind_corrected/.
+# Os logs do CEC ficam no repo irmao STNs-MOCO-MoWFLOP (mesma pasta pai que STN_MoWFLOP),
+# no layout raw_results/wflopcec26/<moead|nsga2>/ns<ID>/<run>/log.txt.
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CEC_ROOT="${CEC_ROOT:-$HERE/../../../../STNs-MOCO-MoWFLOP/raw_results/wflopcec26}"
+OUT="${OUT:-$HERE/cec_wind_map.csv}"
 echo "instance,algo,run_id,angle,wind" > "$OUT"
 
 instances="41 48 101 178 192 202 203 440 465 488"
 for inst in $instances; do
-  for algo_pair in "MOEAD:moead" "NSGA2:nsga2"; do
-    cec_algo="${algo_pair%%:*}"
-    our_algo="${algo_pair##*:}"
+  for our_algo in moead nsga2; do
     for cec_run in $(seq 1 10); do
-      log="$CEC_ROOT/$cec_algo/$inst/$cec_run/log.txt"
+      log="$CEC_ROOT/$our_algo/ns$inst/$cec_run/log.txt"
       if [[ ! -f "$log" ]]; then
         echo "MISSING: $log" >&2
         continue

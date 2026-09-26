@@ -32,8 +32,11 @@ import random
 import sys
 from pathlib import Path
 
-WIND_FILE = "/home/elis/Projects/TCC/STN_MoWFLOP/wflop_instances/wind/RVO_TNW.txt"
-CEC_ROOT = Path("/home/elis/Projects/TCC/STNs-MOCO-MoWFLOP/raw_results/wflopcec26_results")
+# Caminhos relativos a este arquivo: <STN_MoWFLOP>/source_code/meta_heuristics/wind_corrected/.
+# O CEC_ROOT fica no repo irmao STNs-MOCO-MoWFLOP (mesma pasta pai que STN_MoWFLOP).
+STN_ROOT = Path(__file__).resolve().parents[3]
+WIND_FILE = STN_ROOT / "wflop_instances" / "wind" / "RVO_TNW.txt"
+CEC_ROOT = STN_ROOT.parent / "STNs-MOCO-MoWFLOP" / "raw_results" / "wflopcec26"
 N_RUNS = 20
 ALGOS = ["moead", "nsga2"]
 

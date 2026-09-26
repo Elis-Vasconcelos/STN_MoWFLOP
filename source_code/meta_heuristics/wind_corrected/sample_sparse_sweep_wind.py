@@ -32,8 +32,10 @@ em STNs-MOCO-MoWFLOP/raw_results/wind_corrected/, não mais aqui.
 import csv
 import random
 import sys
+from pathlib import Path
 
-WIND_FILE = "/home/elis/Projects/TCC/STN_MoWFLOP/wflop_instances/wind/RVO_TNW.txt"
+# Relativo a este arquivo: <STN_MoWFLOP>/source_code/meta_heuristics/wind_corrected/.
+WIND_FILE = Path(__file__).resolve().parents[3] / "wflop_instances" / "wind" / "RVO_TNW.txt"
 N_RUNS = 30
 ALGOS = ["moead", "nsga2"]
 INSTANCES = [
